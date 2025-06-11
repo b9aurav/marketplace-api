@@ -92,4 +92,73 @@ export class OrdersService {
       },
     };
   }
+
+  async getAllOrders(userId?: string, status?: string) {
+    const queryBuilder = this.ordersRepository.createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.items', 'items')
+      .leftJoinAndSelect('items.product', 'product')
+      .leftJoinAndSelect('order.address', 'address');
+
+    if (userId) {
+      queryBuilder.where('order.user_id = :userId', { userId });
+    }
+
+    if (status) {
+      queryBuilder.andWhere('order.status = :status', { status });
+    }
+
+    const orders = await queryBuilder
+      .orderBy('order.created_at', 'DESC')
+      .getMany();
+
+    return {
+      orders: orders.map(order => ({
+        id: order.id,
+        date: order.created_at,
+        total: order.total,
+        status: order.status,
+        user: {
+          id: order.user.id,
+          email: order.user.email,
+          name: order.user.name,
+        },
+        items: order.items.map(item => ({
+          id: item.id,
+          quantity: item.quantity,
+          price: item.price,
+          product: {
+            id: item.product.id,
+            name: item.product.name,
+            images: item.product.images,
+          },
+        })),
+        address: order.address,
+        tracking_number: order.tracking_number,
+        payment_method: order.payment_method,
+        transaction_id: order.transaction_id,
+      })),
+    };
+  }
+
+  async updateOrderStatus(orderId: string, updateOrderStatusDto: { status: OrderStatus }) {
+    const order = await this.ordersRepository.findOne({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    order.status = updateOrderStatusDto.status;
+    await this.ordersRepository.save(order);
+
+    return {
+      message: 'Order status updated successfully',
+      order: {
+        id: order.id,
+        status: order.status,
+      },
+    };
+  }
 }
