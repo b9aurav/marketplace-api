@@ -14,6 +14,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { RecommendationsModule } from './recommendations/recommendations.module';
 import { AdminModule } from './admin/admin.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
+import { SupabaseModule } from './supabase/supabase.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     RecommendationsModule,
     AdminModule,
     WebhooksModule,
+    SupabaseModule,
   ],
   providers: [
     {

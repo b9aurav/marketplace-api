@@ -7,12 +7,14 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { SupabaseService } from '../supabase/supabase.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private supabaseService: SupabaseService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -56,34 +58,25 @@ export class AuthService {
       return;
     }
     
-    // In a real app, generate a token and send email
-    // For this example, we'll just log it
-    const resetToken = this.jwtService.sign(
-      { sub: user.id, email: user.email },
-      { expiresIn: '1h' },
-    );
-    
-    console.log(`Password reset token for ${email}: ${resetToken}`);
-    
-    // Store the token or send an email with a reset link
-    // await this.usersService.storeResetToken(user.id, resetToken);
+    // Use Supabase to send reset password email
+    await this.supabaseService.resetPassword(email);
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<void> {
     const { token, new_password } = resetPasswordDto;
     
     try {
-      // Verify the token
-      const payload = this.jwtService.verify(token);
+      // Update password in Supabase
+      await this.supabaseService.updatePassword(new_password);
       
-      // Find the user
-      const user = await this.usersService.findOne(payload.sub);
-      if (!user) {
+      // Get user from token
+      const supabaseUser = await this.supabaseService.getUser(token);
+      if (!supabaseUser) {
         throw new UnauthorizedException('Invalid token');
       }
       
-      // Update the password
-      await this.usersService.updatePassword(user.id, new_password);
+      // Update password in local database
+      await this.usersService.updatePassword(supabaseUser.id, new_password);
     } catch (error) {
       throw new UnauthorizedException('Invalid or expired token');
     }

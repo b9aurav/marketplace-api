@@ -7,11 +7,13 @@ import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
+import { SupabaseModule } from '../supabase/supabase.module';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule,
+    SupabaseModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
