@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { Address } from './entities/address.entity';
 import { RegisterDto } from '../auth/dto/register.dto';
 import { CreateAddressDto } from './dto/create-address.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -26,7 +27,6 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
     
-    delete user.password;
     return user;
   }
 
@@ -34,39 +34,9 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { email } });
   }
 
-  async create(registerDto: RegisterDto): Promise<User> {
-    const { email, password, name, phone } = registerDto;
-    
-    // Check if user exists
-    const existingUser = await this.findByEmail(email);
-    if (existingUser) {
-      throw new ConflictException('Email already in use');
-    }
-    
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    // Create new user
-    const user = this.usersRepository.create({
-      email,
-      password: hashedPassword,
-      name,
-      phone,
-    });
-    
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const user = this.usersRepository.create(createUserDto);
     return this.usersRepository.save(user);
-  }
-
-  async updatePassword(userId: string, newPassword: string): Promise<void> {
-    const user = await this.findOne(userId);
-    
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    
-    // Update user
-    await this.usersRepository.update(userId, {
-      password: hashedPassword,
-    });
   }
 
   async addAddress(userId: string, createAddressDto: CreateAddressDto): Promise<Address> {

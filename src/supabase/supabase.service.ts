@@ -61,4 +61,20 @@ export class SupabaseService implements OnModuleInit {
     });
     if (error) throw error;
   }
+
+  async getPublicKey() {
+    try {
+      const url = `${this.configService.get('SUPABASE_URL')}/.well-known/jwks.json`;
+      console.log('Fetching public key from:', url);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch public key: ${response.status} ${response.statusText}`);
+      }
+      const data = await response.json();
+      return { data };
+    } catch (error) {
+      console.error('Error fetching public key:', error);
+      throw error;
+    }
+  }
 } 

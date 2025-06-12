@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { Exclude } from 'class-transformer';
 import { Address } from './address.entity';
 import { Role } from '../../common/decorators/roles.decorator';
+import { Order } from '../../orders/entities/order.entity';
 
 @Entity('users')
 export class User {
@@ -10,10 +10,6 @@ export class User {
 
   @Column({ unique: true })
   email: string;
-
-  @Column()
-  @Exclude({ toPlainOnly: true })
-  password: string;
 
   @Column()
   name: string;
@@ -30,6 +26,9 @@ export class User {
 
   @OneToMany(() => Address, address => address.user)
   addresses: Address[];
+
+  @OneToMany(() => Order, order => order.user)
+  orders: Order[];
 
   @CreateDateColumn()
   created_at: Date;
