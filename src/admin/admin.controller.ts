@@ -4,7 +4,9 @@ import {
   Post, 
   Param, 
   Query, 
-  UseGuards 
+  UseGuards,
+  HttpCode,
+  HttpStatus
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
@@ -44,6 +46,7 @@ export class AdminController {
   }
 
   @Post('users/:id/block')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Block user' })
   @ApiResponse({ status: 200, description: 'User blocked successfully' })
   async blockUser(@Param('id') userId: string) {

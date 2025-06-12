@@ -6,7 +6,8 @@ import {
   Param, 
   Delete, 
   UseGuards, 
-  Request 
+  Request,
+  HttpCode
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { CartService } from './cart.service';
@@ -43,6 +44,7 @@ export class CartController {
   @ApiResponse({ status: 204, description: 'Item removed from cart' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Item not found' })
+  @HttpCode(204)
   async removeItem(@Request() req, @Param('itemId') itemId: string) {
     await this.cartService.removeItem(req.user.id, itemId);
     return null;

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, Like } from 'typeorm';
 import { User } from '../users/entities/user.entity';
@@ -133,7 +133,7 @@ export class AdminService {
     });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     // Update user role to USER (effectively blocking admin access)

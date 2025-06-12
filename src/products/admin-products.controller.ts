@@ -59,4 +59,13 @@ export class AdminProductsController {
       size: file.size,
     };
   }
+
+  @Post('categories')
+  @ApiOperation({ summary: 'Create a new category' })
+  @ApiResponse({ status: 201, description: 'Category created' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  async createCategory(@Body() createCategoryDto: { name: string; description?: string; image?: string }) {
+    return this.productsService.createCategory(createCategoryDto);
+  }
 }

@@ -5,6 +5,7 @@ import {
   Body, 
   UseGuards, 
   Request, 
+  ValidationPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -32,7 +33,10 @@ export class UsersController {
   @ApiOperation({ summary: 'Add a new address to user profile' })
   @ApiResponse({ status: 201, description: 'Address created' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async addAddress(@Request() req, @Body() createAddressDto: CreateAddressDto) {
+  async addAddress(
+    @Request() req, 
+    @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true })) createAddressDto: CreateAddressDto
+  ) {
     return this.usersService.addAddress(req.user.id, createAddressDto);
   }
 }

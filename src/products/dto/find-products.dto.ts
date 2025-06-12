@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
-enum SortOption {
+export enum SortOption {
   PRICE_ASC = 'price_asc',
   PRICE_DESC = 'price_desc',
   NEWEST = 'newest',

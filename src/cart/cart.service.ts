@@ -41,6 +41,9 @@ export class CartService {
 
   async addItem(userId: string, addCartItemDto: AddCartItemDto): Promise<CartItem> {
     const { product_id, quantity } = addCartItemDto;
+    if (quantity < 1) {
+      throw new BadRequestException('Quantity must be at least 1');
+    }
     
     // Check if product exists and has enough stock
     const product = await this.productsService.findOne(product_id);

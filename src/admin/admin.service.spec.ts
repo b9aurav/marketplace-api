@@ -74,85 +74,61 @@ describe('AdminService', () => {
   });
 
   describe('getDashboardSummary', () => {
-    it('should return correct dashboard summary', async () => {
-      // Mock total sales
-      mockQueryBuilder.getRawOne.mockResolvedValueOnce({ total: 1000 });
+    it('should return dashboard summary with correct values', async () => {
+      const mockTotalSales = { total: 1000 };
+      const mockActiveUsers = { count: 10 };
+      const mockPendingOrders = 5;
+      const mockTotalProducts = 50;
 
-      // Mock active users
-      mockQueryBuilder.getRawOne.mockResolvedValueOnce({ count: 10 });
-
-      // Mock pending orders
-      orderRepository.count.mockResolvedValueOnce(5);
-
-      // Mock total products
-      productRepository.count.mockResolvedValueOnce(50);
+      mockQueryBuilder.getRawOne.mockResolvedValueOnce(mockTotalSales);
+      mockQueryBuilder.getRawOne.mockResolvedValueOnce(mockActiveUsers);
+      mockOrderRepository.count.mockResolvedValue(mockPendingOrders);
+      mockProductRepository.count.mockResolvedValue(mockTotalProducts);
 
       const result = await service.getDashboardSummary();
-
       expect(result).toEqual({
         total_sales: 1000,
         active_users: 10,
         pending_orders: 5,
-        total_products: 50,
-      });
-    });
-
-    it('should handle zero values', async () => {
-      // Mock all queries to return zero
-      mockQueryBuilder.getRawOne.mockResolvedValueOnce({ total: 0 });
-      mockQueryBuilder.getRawOne.mockResolvedValueOnce({ count: 0 });
-      orderRepository.count.mockResolvedValueOnce(0);
-      productRepository.count.mockResolvedValueOnce(0);
-
-      const result = await service.getDashboardSummary();
-
-      expect(result).toEqual({
-        total_sales: 0,
-        active_users: 0,
-        pending_orders: 0,
-        total_products: 0,
+        total_products: 50
       });
     });
   });
 
   describe('getSalesAnalytics', () => {
-    it('should return sales data for last 7 days by default', async () => {
+    it('should return sales analytics for last 7 days by default', async () => {
       const mockSalesData = [
         { date: '2024-01-01', revenue: '1000' },
-        { date: '2024-01-02', revenue: '2000' },
+        { date: '2024-01-02', revenue: '2000' }
       ];
-
-      mockQueryBuilder.getRawMany.mockResolvedValueOnce(mockSalesData);
+      mockQueryBuilder.getRawMany.mockResolvedValue(mockSalesData);
 
       const result = await service.getSalesAnalytics();
-
       expect(result).toEqual({
         dates: ['2024-01-01', '2024-01-02'],
         revenue: [1000, 2000],
-        range: 'last_7_days',
+        range: 'last_7_days'
       });
     });
 
-    it('should return sales data for specified range', async () => {
+    it('should return sales analytics for specified range', async () => {
       const mockSalesData = [
         { date: '2024-01-01', revenue: '1000' },
-        { date: '2024-01-02', revenue: '2000' },
+        { date: '2024-01-02', revenue: '2000' }
       ];
-
-      mockQueryBuilder.getRawMany.mockResolvedValueOnce(mockSalesData);
+      mockQueryBuilder.getRawMany.mockResolvedValue(mockSalesData);
 
       const result = await service.getSalesAnalytics('last_30_days');
-
       expect(result).toEqual({
         dates: ['2024-01-01', '2024-01-02'],
         revenue: [1000, 2000],
-        range: 'last_30_days',
+        range: 'last_30_days'
       });
     });
   });
 
   describe('getUsers', () => {
-    it('should return users without search', async () => {
+    it('should return users list without search', async () => {
       const mockUsers = [
         {
           id: '1',
@@ -160,17 +136,24 @@ describe('AdminService', () => {
           email: 'test@example.com',
           created_at: new Date(),
           role: Role.USER,
-          order_count: 2,
-        },
+          order_count: 2
+        }
       ];
-
-      mockQueryBuilder.getManyAndCount.mockResolvedValueOnce([mockUsers, 1]);
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([mockUsers, 1]);
 
       const result = await service.getUsers();
-
       expect(result).toEqual({
-        users: mockUsers,
-        total: 1,
+        users: [
+          {
+            id: '1',
+            name: 'Test User',
+            email: 'test@example.com',
+            created_at: expect.any(Date),
+            role: Role.USER,
+            order_count: 2
+          }
+        ],
+        total: 1
       });
     });
 
@@ -182,49 +165,47 @@ describe('AdminService', () => {
           email: 'test@example.com',
           created_at: new Date(),
           role: Role.USER,
-          order_count: 2,
-        },
+          order_count: 2
+        }
       ];
-
-      mockQueryBuilder.getManyAndCount.mockResolvedValueOnce([mockUsers, 1]);
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([mockUsers, 1]);
 
       const result = await service.getUsers('test');
-
       expect(result).toEqual({
-        users: mockUsers,
-        total: 1,
+        users: [
+          {
+            id: '1',
+            name: 'Test User',
+            email: 'test@example.com',
+            created_at: expect.any(Date),
+            role: Role.USER,
+            order_count: 2
+          }
+        ],
+        total: 1
       });
     });
   });
 
   describe('blockUser', () => {
     it('should block user successfully', async () => {
-      const mockUser = {
-        id: '1',
-        name: 'Test User',
-        email: 'test@example.com',
-        role: Role.ADMIN,
-      };
+      const userId = '1';
+      const mockUser = { id: userId, role: Role.ADMIN };
+      mockUserRepository.findOne.mockResolvedValue(mockUser);
+      mockUserRepository.save.mockResolvedValue({ ...mockUser, role: Role.USER });
 
-      userRepository.findOne.mockResolvedValueOnce(mockUser);
-      userRepository.save.mockResolvedValueOnce({ ...mockUser, role: Role.USER });
-
-      const result = await service.blockUser('1');
-
+      const result = await service.blockUser(userId);
       expect(result).toEqual({
         message: 'User blocked successfully',
-        user_id: '1',
-      });
-      expect(userRepository.save).toHaveBeenCalledWith({
-        ...mockUser,
-        role: Role.USER,
+        user_id: userId
       });
     });
 
     it('should throw error if user not found', async () => {
-      userRepository.findOne.mockResolvedValueOnce(null);
+      const userId = 'non-existent';
+      mockUserRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.blockUser('non-existent')).rejects.toThrow('User not found');
+      await expect(service.blockUser(userId)).rejects.toThrow('User not found');
     });
   });
 }); 

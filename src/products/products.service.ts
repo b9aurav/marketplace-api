@@ -112,4 +112,9 @@ export class ProductsService {
     
     return this.productsRepository.save(product);
   }
+
+  async createCategory(createCategoryDto: { name: string; description?: string; image?: string }): Promise<Category> {
+    const category = this.categoriesRepository.create(createCategoryDto);
+    return this.categoriesRepository.save(category);
+  }
 }
