@@ -117,4 +117,12 @@ export class ProductsService {
     const category = this.categoriesRepository.create(createCategoryDto);
     return this.categoriesRepository.save(category);
   }
+
+  async getCategories(): Promise<Category[]> {
+    return this.categoriesRepository.find({
+      order: {
+        name: 'ASC',
+      },
+    });
+  }
 }

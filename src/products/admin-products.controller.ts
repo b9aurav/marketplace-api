@@ -6,7 +6,8 @@ import {
   Param, 
   UseGuards, 
   UploadedFile, 
-  UseInterceptors 
+  UseInterceptors, 
+  Get
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiConsumes } from '@nestjs/swagger';
@@ -67,5 +68,14 @@ export class AdminProductsController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   async createCategory(@Body() createCategoryDto: { name: string; description?: string; image?: string }) {
     return this.productsService.createCategory(createCategoryDto);
+  }
+
+  @Get('categories')
+  @ApiOperation({ summary: 'Get all product categories' })
+  @ApiResponse({ status: 200, description: 'Returns list of categories' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  async getCategories() {
+    return this.productsService.getCategories();
   }
 }

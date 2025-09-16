@@ -45,6 +45,22 @@ export class Order {
   @Column({ nullable: true })
   transaction_id: string;
 
+  // Admin-specific payment and fee fields
+  @Column({ type: 'jsonb', nullable: true })
+  payment_method_details: Record<string, any>;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  fees: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  net_amount: number;
+
+  @Column({ type: 'text', nullable: true })
+  admin_notes: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  shipping_details: Record<string, any>;
+
   @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
   user: User;

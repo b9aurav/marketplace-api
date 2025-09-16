@@ -1,5 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { SupabaseService } from '../../supabase/supabase.service';
+import { Role } from '@/common/decorators/roles.decorator';
 
 @Injectable()
 export class SupabaseAuthGuard implements CanActivate {
@@ -24,11 +25,10 @@ export class SupabaseAuthGuard implements CanActivate {
         throw new UnauthorizedException('Invalid token');
       }
 
-      // Attach user to request object
       request.user = user;
       return true;
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
     }
   }
-} 
+}

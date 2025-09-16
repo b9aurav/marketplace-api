@@ -53,7 +53,7 @@ describe('AuthService', () => {
 
   describe('register', () => {
     const registerDto: RegisterDto = {
-      email: 'test@example.com',
+      email: 'user@example.com',
       password: 'password123',
       name: 'Test User',
       phone: '+1234567890',
@@ -65,7 +65,7 @@ describe('AuthService', () => {
     };
 
     const mockSession = {
-      access_token: 'access-token',
+      token: 'access-token',
     };
 
     it('should register a new user successfully', async () => {
@@ -121,22 +121,22 @@ describe('AuthService', () => {
 
   describe('login', () => {
     const loginDto: LoginDto = {
-      email: 'test@example.com',
+      email: 'user@example.com',
       password: 'password123',
     };
 
     const mockSupabaseUser = {
       id: 'user-id',
-      email: 'test@example.com',
+      email: 'user@example.com',
     };
 
     const mockSession = {
-      access_token: 'access-token',
+      token: 'access-token',
     };
 
     const mockDbUser = {
       id: 'user-id',
-      email: 'test@example.com',
+      email: 'user@example.com',
       name: 'Test User',
     };
 
@@ -152,7 +152,7 @@ describe('AuthService', () => {
 
       expect(result).toEqual({
         message: 'Login successful',
-        access_token: mockSession.access_token,
+        token: mockSession.token,
         user: {
           id: mockDbUser.id,
           email: mockDbUser.email,

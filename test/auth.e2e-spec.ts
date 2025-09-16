@@ -28,7 +28,7 @@ describe('AuthController (e2e)', () => {
   };
 
   const mockSession = {
-    access_token: 'mock-access-token',
+    token: 'mock-access-token',
     refresh_token: 'mock-refresh-token',
   };
 
@@ -106,7 +106,7 @@ describe('AuthController (e2e)', () => {
         .expect(200)
         .expect((res) => {
           expect(res.body.message).toBe('Login successful');
-          expect(res.body).toHaveProperty('access_token');
+          expect(res.body).toHaveProperty('token');
           expect(res.body.user).toHaveProperty('id');
           expect(res.body.user.email).toBe(testUser.email);
           expect(res.body.user.name).toBe(testUser.name);
@@ -140,7 +140,7 @@ describe('AuthController (e2e)', () => {
     it('should get user profile with valid token', () => {
       return request(app.getHttpServer())
         .get('/auth/me')
-        .set('Authorization', `Bearer ${mockSession.access_token}`)
+        .set('Authorization', `Bearer ${mockSession.token}`)
         .expect(200)
         .expect((res) => {
           expect(res.body).toHaveProperty('id');

@@ -2,13 +2,13 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { SupabaseService } from '../../supabase/supabase.service';
+import { UsersService } from '../../users/users.service';
 
 @Injectable()
 export class SupabaseJwtStrategy extends PassportStrategy(Strategy, 'supabase-jwt') {
   constructor(
     private configService: ConfigService,
-    private supabaseService: SupabaseService,
+    private usersService: UsersService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -18,10 +18,10 @@ export class SupabaseJwtStrategy extends PassportStrategy(Strategy, 'supabase-jw
   }
 
   async validate(payload: any) {
-    return {
-      id: payload.sub,
-      email: payload.email,
-      role: payload.role || 'user',
-    };
+    const user = await this.usersService.findOne(payload.sub);
+    if (!user) {
+      throw new UnauthorizedException('User not found in database');
+    }
+    return user;
   }
-} 
+}

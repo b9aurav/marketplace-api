@@ -7,6 +7,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SupabaseService } from '../supabase/supabase.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { Role } from '@/common/decorators/roles.decorator';
 
 @Injectable()
 export class AuthService {
@@ -72,13 +73,16 @@ export class AuthService {
         throw new UnauthorizedException('User not found in database');
       }
 
+      
+
       return {
         message: 'Login successful',
-        access_token: session.access_token,
+        token: session.access_token,
         user: {
           id: dbUser.id,
           email: dbUser.email,
           name: dbUser.name,
+          role: dbUser.role,
         },
       };
     } catch (error) {

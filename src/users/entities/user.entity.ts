@@ -24,6 +24,16 @@ export class User {
   })
   role: Role;
 
+  // Admin-specific fields
+  @Column({ type: 'timestamp', nullable: true })
+  last_login_at: Date;
+
+  @Column({ type: 'boolean', default: true })
+  is_active: boolean;
+
+  @Column({ type: 'jsonb', nullable: true })
+  metadata: Record<string, any>;
+
   @OneToMany(() => Address, address => address.user)
   addresses: Address[];
 

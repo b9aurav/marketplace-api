@@ -4,6 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
+// Common modules
+import { CacheModule } from './common/cache/cache.module';
+
 // Modules
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -32,7 +35,9 @@ import { SupabaseModule } from './supabase/supabase.module';
         password: configService.get('DB_PASSWORD', 'postgres'),
         database: configService.get('DB_DATABASE', 'marketplace'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        migrations: [__dirname + '/migrations/*{.ts,.js}'],
         synchronize: configService.get('NODE_ENV') !== 'production',
+        migrationsRun: configService.get('NODE_ENV') === 'production',
       }),
     }),
     ThrottlerModule.forRootAsync({
@@ -45,6 +50,7 @@ import { SupabaseModule } from './supabase/supabase.module';
         },
       ],
     }),
+    CacheModule,
     AuthModule,
     UsersModule,
     ProductsModule,

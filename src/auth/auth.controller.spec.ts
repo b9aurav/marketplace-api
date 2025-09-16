@@ -75,7 +75,7 @@ describe('AuthController', () => {
 
     const expectedResponse = {
       message: 'Login successful',
-      access_token: 'access-token',
+      token: 'access-token',
       user: {
         id: 'user-id',
         email: loginDto.email,

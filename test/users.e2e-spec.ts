@@ -44,7 +44,7 @@ describe('UsersController (e2e)', () => {
       password: testUser.password,
     });
 
-    authToken = loginResponse.access_token;
+    authToken = loginResponse.token;
   });
 
   afterAll(async () => {

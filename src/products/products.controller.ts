@@ -20,6 +20,8 @@ export class ProductsController {
   @ApiQuery({ name: 'min_price', required: false })
   @ApiQuery({ name: 'max_price', required: false })
   @ApiQuery({ name: 'sort', required: false })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
   @ApiResponse({ status: 200, description: 'Returns list of products' })
   async findAll(@Query() findProductsDto: FindProductsDto) {
     return this.productsService.findAll(findProductsDto);
