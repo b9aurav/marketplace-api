@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { AdminAuditLog } from '../entities/admin-audit-log.entity';
+import { Injectable, Logger } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { AdminAuditLog } from "../entities/admin-audit-log.entity";
 
 export interface AuditLogData {
   adminId: string;
@@ -12,7 +12,7 @@ export interface AuditLogData {
   metadata?: Record<string, any>;
   ipAddress: string;
   userAgent?: string;
-  status?: 'success' | 'failure';
+  status?: "success" | "failure";
   errorMessage?: string;
 }
 
@@ -36,19 +36,19 @@ export class AdminAuditService {
         metadata: data.metadata,
         ip_address: data.ipAddress,
         user_agent: data.userAgent,
-        status: data.status || 'success',
+        status: data.status || "success",
         error_message: data.errorMessage,
       });
 
       await this.auditLogRepository.save(auditLog);
 
       this.logger.log(
-        `Admin action logged: ${data.action} on ${data.resource} by admin ${data.adminId}`
+        `Admin action logged: ${data.action} on ${data.resource} by admin ${data.adminId}`,
       );
     } catch (error) {
       this.logger.error(
         `Failed to log admin action: ${error.message}`,
-        error.stack
+        error.stack,
       );
     }
   }
@@ -60,31 +60,31 @@ export class AdminAuditService {
     action?: string,
     resource?: string,
     dateFrom?: Date,
-    dateTo?: Date
+    dateTo?: Date,
   ): Promise<{ logs: AdminAuditLog[]; total: number }> {
     const queryBuilder = this.auditLogRepository
-      .createQueryBuilder('audit')
-      .leftJoinAndSelect('audit.admin', 'admin')
-      .orderBy('audit.created_at', 'DESC');
+      .createQueryBuilder("audit")
+      .leftJoinAndSelect("audit.admin", "admin")
+      .orderBy("audit.created_at", "DESC");
 
     if (adminId) {
-      queryBuilder.andWhere('audit.admin_id = :adminId', { adminId });
+      queryBuilder.andWhere("audit.admin_id = :adminId", { adminId });
     }
 
     if (action) {
-      queryBuilder.andWhere('audit.action = :action', { action });
+      queryBuilder.andWhere("audit.action = :action", { action });
     }
 
     if (resource) {
-      queryBuilder.andWhere('audit.resource = :resource', { resource });
+      queryBuilder.andWhere("audit.resource = :resource", { resource });
     }
 
     if (dateFrom) {
-      queryBuilder.andWhere('audit.created_at >= :dateFrom', { dateFrom });
+      queryBuilder.andWhere("audit.created_at >= :dateFrom", { dateFrom });
     }
 
     if (dateTo) {
-      queryBuilder.andWhere('audit.created_at <= :dateTo', { dateTo });
+      queryBuilder.andWhere("audit.created_at <= :dateTo", { dateTo });
     }
 
     const [logs, total] = await queryBuilder

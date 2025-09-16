@@ -1,10 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { DashboardController } from './dashboard.controller';
-import { DashboardService } from '../services/dashboard.service';
-import { AdminGuard } from '../guards/admin.guard';
-import { AdminAuditInterceptor } from '../interceptors/admin-audit.interceptor';
+import { Test, TestingModule } from "@nestjs/testing";
+import { DashboardController } from "./dashboard.controller";
+import { DashboardService } from "../services/dashboard.service";
+import { AdminGuard } from "../guards/admin.guard";
+import { AdminAuditInterceptor } from "../interceptors/admin-audit.interceptor";
 
-describe('DashboardController', () => {
+describe("DashboardController", () => {
   let controller: DashboardController;
   let dashboardService: jest.Mocked<DashboardService>;
 
@@ -35,8 +35,8 @@ describe('DashboardController', () => {
     jest.clearAllMocks();
   });
 
-  describe('getDashboardMetrics', () => {
-    it('should return dashboard metrics', async () => {
+  describe("getDashboardMetrics", () => {
+    it("should return dashboard metrics", async () => {
       const mockMetrics = {
         total_users: 100,
         total_products: 50,
@@ -52,14 +52,14 @@ describe('DashboardController', () => {
 
       dashboardService.getDashboardMetrics.mockResolvedValue(mockMetrics);
 
-      const query = { date_from: '2024-01-01', date_to: '2024-01-31' };
+      const query = { date_from: "2024-01-01", date_to: "2024-01-31" };
       const result = await controller.getDashboardMetrics(query);
 
       expect(result).toEqual(mockMetrics);
       expect(dashboardService.getDashboardMetrics).toHaveBeenCalledWith(query);
     });
 
-    it('should handle empty query parameters', async () => {
+    it("should handle empty query parameters", async () => {
       const mockMetrics = {
         total_users: 100,
         total_products: 50,
@@ -82,27 +82,37 @@ describe('DashboardController', () => {
     });
   });
 
-  describe('getSalesAnalytics', () => {
-    it('should return sales analytics', async () => {
+  describe("getSalesAnalytics", () => {
+    it("should return sales analytics", async () => {
       const mockAnalytics = {
         sales_trend: [
-          { date: '2024-01-01', revenue: 1000, orders: 10, average_order_value: 100 },
-          { date: '2024-01-02', revenue: 1200, orders: 12, average_order_value: 100 },
+          {
+            date: "2024-01-01",
+            revenue: 1000,
+            orders: 10,
+            average_order_value: 100,
+          },
+          {
+            date: "2024-01-02",
+            revenue: 1200,
+            orders: 12,
+            average_order_value: 100,
+          },
         ],
         total_revenue: 5000,
         total_orders: 50,
         growth_rate: 15,
         average_order_value: 100,
-        peak_sales_day: '2024-01-02',
+        peak_sales_day: "2024-01-02",
         peak_sales_amount: 1200,
       };
 
       dashboardService.getSalesAnalytics.mockResolvedValue(mockAnalytics);
 
       const query = {
-        date_from: '2024-01-01',
-        date_to: '2024-01-31',
-        interval: 'day',
+        date_from: "2024-01-01",
+        date_to: "2024-01-31",
+        interval: "day",
       };
 
       const result = await controller.getSalesAnalytics(query);
@@ -111,26 +121,36 @@ describe('DashboardController', () => {
       expect(dashboardService.getSalesAnalytics).toHaveBeenCalledWith(query);
     });
 
-    it('should handle different intervals', async () => {
+    it("should handle different intervals", async () => {
       const mockAnalytics = {
         sales_trend: [
-          { date: '2024-01', revenue: 30000, orders: 300, average_order_value: 100 },
-          { date: '2024-02', revenue: 35000, orders: 350, average_order_value: 100 },
+          {
+            date: "2024-01",
+            revenue: 30000,
+            orders: 300,
+            average_order_value: 100,
+          },
+          {
+            date: "2024-02",
+            revenue: 35000,
+            orders: 350,
+            average_order_value: 100,
+          },
         ],
         total_revenue: 65000,
         total_orders: 650,
         growth_rate: 25,
         average_order_value: 100,
-        peak_sales_day: '2024-02',
+        peak_sales_day: "2024-02",
         peak_sales_amount: 35000,
       };
 
       dashboardService.getSalesAnalytics.mockResolvedValue(mockAnalytics);
 
       const query = {
-        date_from: '2024-01-01',
-        date_to: '2024-02-29',
-        interval: 'month',
+        date_from: "2024-01-01",
+        date_to: "2024-02-29",
+        interval: "month",
       };
 
       const result = await controller.getSalesAnalytics(query);
@@ -139,22 +159,22 @@ describe('DashboardController', () => {
       expect(dashboardService.getSalesAnalytics).toHaveBeenCalledWith(query);
     });
 
-    it('should use default interval when not specified', async () => {
+    it("should use default interval when not specified", async () => {
       const mockAnalytics = {
         sales_trend: [],
         total_revenue: 0,
         total_orders: 0,
         growth_rate: 0,
         average_order_value: 0,
-        peak_sales_day: '',
+        peak_sales_day: "",
         peak_sales_amount: 0,
       };
 
       dashboardService.getSalesAnalytics.mockResolvedValue(mockAnalytics);
 
       const query = {
-        date_from: '2024-01-01',
-        date_to: '2024-01-31',
+        date_from: "2024-01-01",
+        date_to: "2024-01-31",
       };
 
       await controller.getSalesAnalytics(query);

@@ -1,9 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { User } from './user.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from "typeorm";
+import { User } from "./user.entity";
 
-@Entity('addresses')
+@Entity("addresses")
 export class Address {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column()
@@ -24,8 +30,8 @@ export class Address {
   @Column({ default: false })
   is_default: boolean;
 
-  @ManyToOne(() => User, user => user.addresses)
-  @JoinColumn({ name: 'user_id' })
+  @ManyToOne(() => User, (user) => user.addresses)
+  @JoinColumn({ name: "user_id" })
   user: User;
 
   @Column()

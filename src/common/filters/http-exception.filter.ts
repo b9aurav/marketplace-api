@@ -3,9 +3,8 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
-  HttpStatus,
-} from '@nestjs/common';
-import { Request, Response } from 'express';
+} from "@nestjs/common";
+import { Request, Response } from "express";
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -16,24 +15,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
 
     const errorResponse = {
-      status: 'error',
+      status: "error",
       timestamp: new Date().toISOString(),
       path: request.url,
-      message: exception.message || 'Internal server error',
+      message: exception.message || "Internal server error",
       data: null,
     };
 
     // Add validation errors if available
     const exceptionResponse = exception.getResponse() as any;
     if (exceptionResponse && exceptionResponse.message) {
-      errorResponse.message = 
-        Array.isArray(exceptionResponse.message) 
-          ? exceptionResponse.message.join(', ') 
-          : exceptionResponse.message;
+      errorResponse.message = Array.isArray(exceptionResponse.message)
+        ? exceptionResponse.message.join(", ")
+        : exceptionResponse.message;
     }
 
-    response
-      .status(status)
-      .json(errorResponse);
+    response.status(status).json(errorResponse);
   }
 }

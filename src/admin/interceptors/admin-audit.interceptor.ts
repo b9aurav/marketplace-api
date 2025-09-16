@@ -3,12 +3,15 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
-import { AdminAuditService } from '../services/admin-audit.service';
-import { ADMIN_AUDIT_KEY, AdminAuditOptions } from '../decorators/admin-audit.decorator';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { Observable } from "rxjs";
+import { tap, catchError } from "rxjs/operators";
+import { AdminAuditService } from "../services/admin-audit.service";
+import {
+  ADMIN_AUDIT_KEY,
+  AdminAuditOptions,
+} from "../decorators/admin-audit.decorator";
 
 @Injectable()
 export class AdminAuditInterceptor implements NestInterceptor {
@@ -30,7 +33,7 @@ export class AdminAuditInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const ipAddress = request.ip || request.connection.remoteAddress;
-    const userAgent = request.get('User-Agent');
+    const userAgent = request.get("User-Agent");
 
     return next.handle().pipe(
       tap(() => {
@@ -48,7 +51,7 @@ export class AdminAuditInterceptor implements NestInterceptor {
           },
           ipAddress,
           userAgent,
-          status: 'success',
+          status: "success",
         });
       }),
       catchError((error) => {
@@ -66,7 +69,7 @@ export class AdminAuditInterceptor implements NestInterceptor {
           },
           ipAddress,
           userAgent,
-          status: 'failure',
+          status: "failure",
           errorMessage: error.message,
         });
 

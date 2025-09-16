@@ -1,20 +1,23 @@
-import { Injectable } from '@nestjs/common';
-import { ICacheKeyGenerator } from './interfaces/cache.interface';
+import { Injectable } from "@nestjs/common";
+import { ICacheKeyGenerator } from "./interfaces/cache.interface";
 
 @Injectable()
 export class CacheKeyGenerator implements ICacheKeyGenerator {
-  private readonly separator = ':';
+  private readonly separator = ":";
 
   generateKey(prefix: string, params: Record<string, any>): string {
     const keyParts = [prefix];
-    
+
     // Sort params by key to ensure consistent key generation
     const sortedParams = Object.keys(params)
       .sort()
-      .reduce((result, key) => {
-        result[key] = params[key];
-        return result;
-      }, {} as Record<string, any>);
+      .reduce(
+        (result, key) => {
+          result[key] = params[key];
+          return result;
+        },
+        {} as Record<string, any>,
+      );
 
     // Add each parameter to the key
     for (const [key, value] of Object.entries(sortedParams)) {
@@ -22,8 +25,8 @@ export class CacheKeyGenerator implements ICacheKeyGenerator {
         // Handle different value types
         let stringValue: string;
         if (Array.isArray(value)) {
-          stringValue = value.join(',');
-        } else if (typeof value === 'object') {
+          stringValue = value.join(",");
+        } else if (typeof value === "object") {
           stringValue = JSON.stringify(value);
         } else {
           stringValue = String(value);
@@ -53,7 +56,7 @@ export class CacheKeyGenerator implements ICacheKeyGenerator {
     prefix: string,
     page: number = 1,
     limit: number = 10,
-    filters: Record<string, any> = {}
+    filters: Record<string, any> = {},
   ): string {
     const params = {
       page,
@@ -70,15 +73,15 @@ export class CacheKeyGenerator implements ICacheKeyGenerator {
     prefix: string,
     dateFrom?: Date,
     dateTo?: Date,
-    interval?: string
+    interval?: string,
   ): string {
     const params: Record<string, any> = {};
-    
+
     if (dateFrom) {
-      params.from = dateFrom.toISOString().split('T')[0]; // YYYY-MM-DD format
+      params.from = dateFrom.toISOString().split("T")[0]; // YYYY-MM-DD format
     }
     if (dateTo) {
-      params.to = dateTo.toISOString().split('T')[0];
+      params.to = dateTo.toISOString().split("T")[0];
     }
     if (interval) {
       params.interval = interval;

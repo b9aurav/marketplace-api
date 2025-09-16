@@ -1,20 +1,24 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
-import { NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
-import { ProductManagementService } from './product-management.service';
-import { Product, ProductStatus } from '../../products/entities/product.entity';
-import { Category } from '../../products/entities/category.entity';
-import { CacheService } from '../../common/cache/cache.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { getRepositoryToken } from "@nestjs/typeorm";
+import { Repository, SelectQueryBuilder } from "typeorm";
+import {
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from "@nestjs/common";
+import { ProductManagementService } from "./product-management.service";
+import { Product, ProductStatus } from "../../products/entities/product.entity";
+import { Category } from "../../products/entities/category.entity";
+import { CacheService } from "../../common/cache/cache.service";
 import {
   GetProductsQueryDto,
   AdminCreateProductDto,
   AdminUpdateProductDto,
   UpdateInventoryDto,
-  BulkProductActionDto
-} from '../dto/product-management.dto';
+  BulkProductActionDto,
+} from "../dto/product-management.dto";
 
-describe('ProductManagementService', () => {
+describe("ProductManagementService", () => {
   let service: ProductManagementService;
   let productRepository: jest.Mocked<Repository<Product>>;
   let categoryRepository: jest.Mocked<Repository<Category>>;
@@ -22,58 +26,58 @@ describe('ProductManagementService', () => {
   let queryBuilder: jest.Mocked<SelectQueryBuilder<Product>>;
 
   const mockProduct: Product = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-    name: 'Test Product',
-    description: 'Test Description',
+    id: "123e4567-e89b-12d3-a456-426614174000",
+    name: "Test Product",
+    description: "Test Description",
     price: 99.99,
     stock: 10,
-    images: ['image1.jpg'],
+    images: ["image1.jpg"],
     rating: 4.5,
-    sku: 'TEST-001',
+    sku: "TEST-001",
     weight: 1.5,
     dimensions: { length: 10, width: 5, height: 3 },
     status: ProductStatus.ACTIVE,
     featured: false,
-    tags: ['test'],
-    meta_title: 'Test Meta Title',
-    meta_description: 'Test Meta Description',
+    tags: ["test"],
+    meta_title: "Test Meta Title",
+    meta_description: "Test Meta Description",
     minimum_stock: 5,
     sales_count: 0,
-    category_id: 'cat-123',
+    category_id: "cat-123",
     created_at: new Date(),
     updated_at: new Date(),
     category: {
-      id: 'cat-123',
-      name: 'Test Category',
-      description: 'Test Category Description',
-      image: 'category.jpg',
+      id: "cat-123",
+      name: "Test Category",
+      description: "Test Category Description",
+      image: "category.jpg",
       products: [],
-      slug: '',
+      slug: "",
       is_active: false,
       sort_order: 0,
-      parent_id: '',
-      parent: new Category,
+      parent_id: "",
+      parent: new Category(),
       children: [],
       created_at: undefined,
-      updated_at: undefined
+      updated_at: undefined,
     },
-    reviews: []
+    reviews: [],
   };
 
   const mockCategory = {
-    id: 'cat-123',
-    name: 'Test Category',
-    description: 'Test Category Description',
-    image: 'category.jpg',
+    id: "cat-123",
+    name: "Test Category",
+    description: "Test Category Description",
+    image: "category.jpg",
     products: [],
-    slug: '',
+    slug: "",
     is_active: false,
     sort_order: 0,
-    parent_id: '',
-    parent: new Category,
+    parent_id: "",
+    parent: new Category(),
     children: [],
     created_at: undefined,
-    updated_at: undefined
+    updated_at: undefined,
   };
 
   beforeEach(async () => {
@@ -93,7 +97,7 @@ describe('ProductManagementService', () => {
       leftJoin: jest.fn().mockReturnThis(),
       groupBy: jest.fn().mockReturnThis(),
       limit: jest.fn().mockReturnThis(),
-      clone: jest.fn().mockReturnThis()
+      clone: jest.fn().mockReturnThis(),
     } as any;
 
     const module: TestingModule = await Test.createTestingModule({
@@ -107,14 +111,14 @@ describe('ProductManagementService', () => {
             create: jest.fn(),
             save: jest.fn(),
             update: jest.fn(),
-            createQueryBuilder: jest.fn().mockReturnValue(queryBuilder)
-          }
+            createQueryBuilder: jest.fn().mockReturnValue(queryBuilder),
+          },
         },
         {
           provide: getRepositoryToken(Category),
           useValue: {
-            findOne: jest.fn()
-          }
+            findOne: jest.fn(),
+          },
         },
         {
           provide: CacheService,
@@ -122,10 +126,10 @@ describe('ProductManagementService', () => {
             get: jest.fn(),
             set: jest.fn(),
             del: jest.fn(),
-            delPattern: jest.fn()
-          }
-        }
-      ]
+            delPattern: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<ProductManagementService>(ProductManagementService);
@@ -134,16 +138,16 @@ describe('ProductManagementService', () => {
     cacheService = module.get(CacheService);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(service).toBeDefined();
   });
 
-  describe('getProducts', () => {
-    it('should return cached products if available', async () => {
+  describe("getProducts", () => {
+    it("should return cached products if available", async () => {
       const query: GetProductsQueryDto = { page: 1, limit: 10 };
       const cachedResult = {
         data: [mockProduct],
-        pagination: { total: 1, page: 1, limit: 10, total_pages: 1 }
+        pagination: { total: 1, page: 1, limit: 10, total_pages: 1 },
       };
 
       cacheService.get.mockResolvedValue(cachedResult);
@@ -155,7 +159,7 @@ describe('ProductManagementService', () => {
       expect(productRepository.createQueryBuilder).not.toHaveBeenCalled();
     });
 
-    it('should fetch products from database when cache miss', async () => {
+    it("should fetch products from database when cache miss", async () => {
       const query: GetProductsQueryDto = { page: 1, limit: 10 };
 
       cacheService.get.mockResolvedValue(null);
@@ -169,8 +173,8 @@ describe('ProductManagementService', () => {
       expect(cacheService.set).toHaveBeenCalled();
     });
 
-    it('should apply search filter correctly', async () => {
-      const query: GetProductsQueryDto = { search: 'test', page: 1, limit: 10 };
+    it("should apply search filter correctly", async () => {
+      const query: GetProductsQueryDto = { search: "test", page: 1, limit: 10 };
 
       cacheService.get.mockResolvedValue(null);
       queryBuilder.getCount.mockResolvedValue(0);
@@ -179,13 +183,17 @@ describe('ProductManagementService', () => {
       await service.getProducts(query);
 
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
-        '(product.name ILIKE :search OR product.description ILIKE :search OR product.sku ILIKE :search)',
-        { search: '%test%' }
+        "(product.name ILIKE :search OR product.description ILIKE :search OR product.sku ILIKE :search)",
+        { search: "%test%" },
       );
     });
 
-    it('should apply status filter correctly', async () => {
-      const query: GetProductsQueryDto = { status: ProductStatus.ACTIVE, page: 1, limit: 10 };
+    it("should apply status filter correctly", async () => {
+      const query: GetProductsQueryDto = {
+        status: ProductStatus.ACTIVE,
+        page: 1,
+        limit: 10,
+      };
 
       cacheService.get.mockResolvedValue(null);
       queryBuilder.getCount.mockResolvedValue(0);
@@ -194,16 +202,21 @@ describe('ProductManagementService', () => {
       await service.getProducts(query);
 
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
-        'product.status = :status',
-        { status: ProductStatus.ACTIVE }
+        "product.status = :status",
+        { status: ProductStatus.ACTIVE },
       );
     });
   });
 
-  describe('getProductDetails', () => {
-    it('should return cached product details if available', async () => {
-      const productId = '123e4567-e89b-12d3-a456-426614174000';
-      const cachedProduct = { ...mockProduct, low_stock: false, category_name: 'Test Category', total_reviews: 0 };
+  describe("getProductDetails", () => {
+    it("should return cached product details if available", async () => {
+      const productId = "123e4567-e89b-12d3-a456-426614174000";
+      const cachedProduct = {
+        ...mockProduct,
+        low_stock: false,
+        category_name: "Test Category",
+        total_reviews: 0,
+      };
 
       cacheService.get.mockResolvedValue(cachedProduct);
 
@@ -214,8 +227,8 @@ describe('ProductManagementService', () => {
       expect(productRepository.findOne).not.toHaveBeenCalled();
     });
 
-    it('should fetch product from database when cache miss', async () => {
-      const productId = '123e4567-e89b-12d3-a456-426614174000';
+    it("should fetch product from database when cache miss", async () => {
+      const productId = "123e4567-e89b-12d3-a456-426614174000";
 
       cacheService.get.mockResolvedValue(null);
       productRepository.findOne.mockResolvedValue(mockProduct);
@@ -227,28 +240,30 @@ describe('ProductManagementService', () => {
       expect(cacheService.set).toHaveBeenCalled();
     });
 
-    it('should throw NotFoundException when product not found', async () => {
-      const productId = '123e4567-e89b-12d3-a456-426614174000';
+    it("should throw NotFoundException when product not found", async () => {
+      const productId = "123e4567-e89b-12d3-a456-426614174000";
 
       cacheService.get.mockResolvedValue(null);
       productRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.getProductDetails(productId)).rejects.toThrow(NotFoundException);
+      await expect(service.getProductDetails(productId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
-  describe('createProduct', () => {
+  describe("createProduct", () => {
     const createProductDto: AdminCreateProductDto = {
-      name: 'New Product',
-      description: 'New Product Description',
+      name: "New Product",
+      description: "New Product Description",
       price: 199.99,
       stock: 20,
-      images: ['image1.jpg'],
-      category_id: 'cat-123',
-      sku: 'NEW-001'
+      images: ["image1.jpg"],
+      category_id: "cat-123",
+      sku: "NEW-001",
     };
 
-    it('should create product successfully', async () => {
+    it("should create product successfully", async () => {
       productRepository.findOne.mockResolvedValue(null); // No existing product with SKU
       categoryRepository.findOne.mockResolvedValue(mockCategory);
       productRepository.create.mockReturnValue(mockProduct);
@@ -256,7 +271,9 @@ describe('ProductManagementService', () => {
 
       // Mock getProductDetails call
       cacheService.get.mockResolvedValue(null);
-      productRepository.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce(mockProduct);
+      productRepository.findOne
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(mockProduct);
 
       const result = await service.createProduct(createProductDto);
 
@@ -264,40 +281,49 @@ describe('ProductManagementService', () => {
       expect(productRepository.create).toHaveBeenCalledWith({
         ...createProductDto,
         rating: 0,
-        sales_count: 0
+        sales_count: 0,
       });
       expect(cacheService.delPattern).toHaveBeenCalled();
     });
 
-    it('should throw ConflictException when SKU already exists', async () => {
+    it("should throw ConflictException when SKU already exists", async () => {
       productRepository.findOne.mockResolvedValue(mockProduct); // Existing product with SKU
 
-      await expect(service.createProduct(createProductDto)).rejects.toThrow(ConflictException);
+      await expect(service.createProduct(createProductDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
-    it('should throw BadRequestException when category not found', async () => {
+    it("should throw BadRequestException when category not found", async () => {
       productRepository.findOne.mockResolvedValue(null); // No existing product with SKU
       categoryRepository.findOne.mockResolvedValue(null); // Category not found
 
-      await expect(service.createProduct(createProductDto)).rejects.toThrow(BadRequestException);
+      await expect(service.createProduct(createProductDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
-  describe('updateProduct', () => {
+  describe("updateProduct", () => {
     const updateProductDto: AdminUpdateProductDto = {
-      name: 'Updated Product',
-      price: 299.99
+      name: "Updated Product",
+      price: 299.99,
     };
 
-    it('should update product successfully', async () => {
-      const productId = '123e4567-e89b-12d3-a456-426614174000';
+    it("should update product successfully", async () => {
+      const productId = "123e4567-e89b-12d3-a456-426614174000";
 
       productRepository.findOne.mockResolvedValue(mockProduct);
-      productRepository.save.mockResolvedValue({ ...mockProduct, ...updateProductDto });
+      productRepository.save.mockResolvedValue({
+        ...mockProduct,
+        ...updateProductDto,
+      });
 
       // Mock getProductDetails call
       cacheService.get.mockResolvedValue(null);
-      productRepository.findOne.mockResolvedValueOnce(mockProduct).mockResolvedValueOnce({ ...mockProduct, ...updateProductDto });
+      productRepository.findOne
+        .mockResolvedValueOnce(mockProduct)
+        .mockResolvedValueOnce({ ...mockProduct, ...updateProductDto });
 
       const result = await service.updateProduct(productId, updateProductDto);
 
@@ -306,65 +332,74 @@ describe('ProductManagementService', () => {
       expect(cacheService.delPattern).toHaveBeenCalled();
     });
 
-    it('should throw NotFoundException when product not found', async () => {
-      const productId = '123e4567-e89b-12d3-a456-426614174000';
+    it("should throw NotFoundException when product not found", async () => {
+      const productId = "123e4567-e89b-12d3-a456-426614174000";
 
       productRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.updateProduct(productId, updateProductDto)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.updateProduct(productId, updateProductDto),
+      ).rejects.toThrow(NotFoundException);
     });
 
-    it('should throw ConflictException when updating to existing SKU', async () => {
-      const productId = '123e4567-e89b-12d3-a456-426614174000';
-      const updateDto = { sku: 'EXISTING-SKU' };
-      const existingProduct = { ...mockProduct, sku: 'EXISTING-SKU' };
+    it("should throw ConflictException when updating to existing SKU", async () => {
+      const productId = "123e4567-e89b-12d3-a456-426614174000";
+      const updateDto = { sku: "EXISTING-SKU" };
+      const existingProduct = { ...mockProduct, sku: "EXISTING-SKU" };
 
       productRepository.findOne
         .mockResolvedValueOnce(mockProduct) // First call for the product being updated
         .mockResolvedValueOnce(existingProduct); // Second call to check SKU uniqueness
 
-      await expect(service.updateProduct(productId, updateDto)).rejects.toThrow(ConflictException);
+      await expect(service.updateProduct(productId, updateDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
-  describe('deleteProduct', () => {
-    it('should soft delete product successfully', async () => {
-      const productId = '123e4567-e89b-12d3-a456-426614174000';
+  describe("deleteProduct", () => {
+    it("should soft delete product successfully", async () => {
+      const productId = "123e4567-e89b-12d3-a456-426614174000";
 
       productRepository.findOne.mockResolvedValue(mockProduct);
-      productRepository.save.mockResolvedValue({ ...mockProduct, status: ProductStatus.INACTIVE });
+      productRepository.save.mockResolvedValue({
+        ...mockProduct,
+        status: ProductStatus.INACTIVE,
+      });
 
       await service.deleteProduct(productId);
 
       expect(productRepository.save).toHaveBeenCalledWith({
         ...mockProduct,
-        status: ProductStatus.INACTIVE
+        status: ProductStatus.INACTIVE,
       });
       expect(cacheService.delPattern).toHaveBeenCalled();
     });
 
-    it('should throw NotFoundException when product not found', async () => {
-      const productId = '123e4567-e89b-12d3-a456-426614174000';
+    it("should throw NotFoundException when product not found", async () => {
+      const productId = "123e4567-e89b-12d3-a456-426614174000";
 
       productRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.deleteProduct(productId)).rejects.toThrow(NotFoundException);
+      await expect(service.deleteProduct(productId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
-  describe('updateInventory', () => {
-    it('should update inventory successfully', async () => {
-      const productId = '123e4567-e89b-12d3-a456-426614174000';
+  describe("updateInventory", () => {
+    it("should update inventory successfully", async () => {
+      const productId = "123e4567-e89b-12d3-a456-426614174000";
       const updateInventoryDto: UpdateInventoryDto = {
         stock: 50,
-        minimum_stock: 10
+        minimum_stock: 10,
       };
 
       productRepository.findOne.mockResolvedValue(mockProduct);
       productRepository.save.mockResolvedValue({
         ...mockProduct,
         stock: 50,
-        minimum_stock: 10
+        minimum_stock: 10,
       });
 
       await service.updateInventory(productId, updateInventoryDto);
@@ -372,26 +407,28 @@ describe('ProductManagementService', () => {
       expect(productRepository.save).toHaveBeenCalledWith({
         ...mockProduct,
         stock: 50,
-        minimum_stock: 10
+        minimum_stock: 10,
       });
       expect(cacheService.delPattern).toHaveBeenCalled();
     });
 
-    it('should throw NotFoundException when product not found', async () => {
-      const productId = '123e4567-e89b-12d3-a456-426614174000';
+    it("should throw NotFoundException when product not found", async () => {
+      const productId = "123e4567-e89b-12d3-a456-426614174000";
       const updateInventoryDto: UpdateInventoryDto = { stock: 50 };
 
       productRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.updateInventory(productId, updateInventoryDto)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.updateInventory(productId, updateInventoryDto),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('bulkAction', () => {
-    it('should perform bulk activate action successfully', async () => {
+  describe("bulkAction", () => {
+    it("should perform bulk activate action successfully", async () => {
       const bulkActionDto: BulkProductActionDto = {
-        product_ids: ['id1', 'id2'],
-        action: 'activate'
+        product_ids: ["id1", "id2"],
+        action: "activate",
       };
 
       productRepository.find.mockResolvedValue([mockProduct, mockProduct]);
@@ -401,36 +438,40 @@ describe('ProductManagementService', () => {
 
       expect(productRepository.update).toHaveBeenCalledWith(
         { id: expect.any(Object) },
-        { status: ProductStatus.ACTIVE }
+        { status: ProductStatus.ACTIVE },
       );
       expect(cacheService.delPattern).toHaveBeenCalled();
     });
 
-    it('should throw BadRequestException when some products not found', async () => {
+    it("should throw BadRequestException when some products not found", async () => {
       const bulkActionDto: BulkProductActionDto = {
-        product_ids: ['id1', 'id2'],
-        action: 'activate'
+        product_ids: ["id1", "id2"],
+        action: "activate",
       };
 
       productRepository.find.mockResolvedValue([mockProduct]); // Only 1 product found, but 2 requested
 
-      await expect(service.bulkAction(bulkActionDto)).rejects.toThrow(BadRequestException);
+      await expect(service.bulkAction(bulkActionDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
-    it('should throw BadRequestException for invalid action', async () => {
+    it("should throw BadRequestException for invalid action", async () => {
       const bulkActionDto: BulkProductActionDto = {
-        product_ids: ['id1'],
-        action: 'invalid_action'
+        product_ids: ["id1"],
+        action: "invalid_action",
       };
 
       productRepository.find.mockResolvedValue([mockProduct]);
 
-      await expect(service.bulkAction(bulkActionDto)).rejects.toThrow(BadRequestException);
+      await expect(service.bulkAction(bulkActionDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
-  describe('getProductAnalytics', () => {
-    it('should return cached analytics if available', async () => {
+  describe("getProductAnalytics", () => {
+    it("should return cached analytics if available", async () => {
       const cachedAnalytics = {
         total_products: 100,
         active_products: 80,
@@ -444,7 +485,12 @@ describe('ProductManagementService', () => {
         top_selling_products: [],
         category_distribution: [],
         stock_distribution: { in_stock: 95, low_stock: 10, out_of_stock: 5 },
-        price_distribution: { under_100: 30, between_100_500: 50, between_500_1000: 15, over_1000: 5 }
+        price_distribution: {
+          under_100: 30,
+          between_100_500: 50,
+          between_500_1000: 15,
+          over_1000: 5,
+        },
       };
 
       cacheService.get.mockResolvedValue(cachedAnalytics);
@@ -455,26 +501,26 @@ describe('ProductManagementService', () => {
       expect(cacheService.get).toHaveBeenCalled();
     });
 
-    it('should calculate analytics from database when cache miss', async () => {
+    it("should calculate analytics from database when cache miss", async () => {
       cacheService.get.mockResolvedValue(null);
 
       // Mock all the count queries
       queryBuilder.getCount
         .mockResolvedValueOnce(100) // total_products
-        .mockResolvedValueOnce(80)  // active_products
-        .mockResolvedValueOnce(15)  // inactive_products
-        .mockResolvedValueOnce(5)   // draft_products
-        .mockResolvedValueOnce(20)  // featured_products
-        .mockResolvedValueOnce(10)  // low_stock_products
-        .mockResolvedValueOnce(5)   // out_of_stock_products
-        .mockResolvedValueOnce(30)  // under_100
-        .mockResolvedValueOnce(50)  // between_100_500
-        .mockResolvedValueOnce(15)  // between_500_1000
-        .mockResolvedValueOnce(5);  // over_1000
+        .mockResolvedValueOnce(80) // active_products
+        .mockResolvedValueOnce(15) // inactive_products
+        .mockResolvedValueOnce(5) // draft_products
+        .mockResolvedValueOnce(20) // featured_products
+        .mockResolvedValueOnce(10) // low_stock_products
+        .mockResolvedValueOnce(5) // out_of_stock_products
+        .mockResolvedValueOnce(30) // under_100
+        .mockResolvedValueOnce(50) // between_100_500
+        .mockResolvedValueOnce(15) // between_500_1000
+        .mockResolvedValueOnce(5); // over_1000
 
       queryBuilder.getRawOne.mockResolvedValue({
-        total_inventory_value: '50000',
-        average_price: '150'
+        total_inventory_value: "50000",
+        average_price: "150",
       });
 
       queryBuilder.getRawMany

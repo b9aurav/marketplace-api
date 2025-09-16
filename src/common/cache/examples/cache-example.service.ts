@@ -1,6 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { Cache, CacheInvalidate } from '../decorators/cache.decorator';
-import { CACHE_TTL, CACHE_KEYS, CACHE_PATTERNS } from '../constants/cache.constants';
+import { Injectable } from "@nestjs/common";
+import { Cache, CacheInvalidate } from "../decorators/cache.decorator";
+import {
+  CACHE_TTL,
+  CACHE_KEYS,
+  CACHE_PATTERNS,
+} from "../constants/cache.constants";
 
 @Injectable()
 export class CacheExampleService {
@@ -10,12 +14,14 @@ export class CacheExampleService {
   @Cache({ ttl: CACHE_TTL.USER_LIST })
   async getUserList(page: number = 1, limit: number = 10, search?: string) {
     // Simulate database query
-    console.log(`Fetching users from database: page=${page}, limit=${limit}, search=${search}`);
-    
+    console.log(
+      `Fetching users from database: page=${page}, limit=${limit}, search=${search}`,
+    );
+
     return {
       users: [
-        { id: 1, name: 'John Doe', email: 'john@example.com' },
-        { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+        { id: 1, name: "John Doe", email: "john@example.com" },
+        { id: 2, name: "Jane Smith", email: "jane@example.com" },
       ],
       total: 2,
       page,
@@ -33,11 +39,11 @@ export class CacheExampleService {
   async getUserDetails(userId: string) {
     // Simulate database query
     console.log(`Fetching user details from database: userId=${userId}`);
-    
+
     return {
       id: userId,
-      name: 'John Doe',
-      email: 'john@example.com',
+      name: "John Doe",
+      email: "john@example.com",
       createdAt: new Date(),
     };
   }
@@ -55,12 +61,14 @@ export class CacheExampleService {
   })
   async getProductList(page: number = 1, limit: number = 10, search?: string) {
     // Simulate database query
-    console.log(`Fetching products from database: page=${page}, limit=${limit}, search=${search}`);
-    
+    console.log(
+      `Fetching products from database: page=${page}, limit=${limit}, search=${search}`,
+    );
+
     return {
       products: [
-        { id: 1, name: 'Product 1', price: 100 },
-        { id: 2, name: 'Product 2', price: 200 },
+        { id: 1, name: "Product 1", price: 100 },
+        { id: 2, name: "Product 2", price: 200 },
       ],
       total: 2,
       page,
@@ -75,7 +83,7 @@ export class CacheExampleService {
   async updateUser(userId: string, data: any) {
     // Simulate database update
     console.log(`Updating user in database: userId=${userId}`, data);
-    
+
     return {
       id: userId,
       ...data,
@@ -90,7 +98,7 @@ export class CacheExampleService {
   async updateProduct(productId: string, data: any) {
     // Simulate database update
     console.log(`Updating product in database: productId=${productId}`, data);
-    
+
     return {
       id: productId,
       ...data,
@@ -106,16 +114,19 @@ export class CacheExampleService {
     keyGenerator: (args) => {
       const [dateFrom, dateTo, interval] = args;
       const keyParts: string[] = [CACHE_KEYS.SALES_ANALYTICS];
-      if (dateFrom) keyParts.push(`from=${dateFrom.toISOString().split('T')[0]}`);
-      if (dateTo) keyParts.push(`to=${dateTo.toISOString().split('T')[0]}`);
+      if (dateFrom)
+        keyParts.push(`from=${dateFrom.toISOString().split("T")[0]}`);
+      if (dateTo) keyParts.push(`to=${dateTo.toISOString().split("T")[0]}`);
       if (interval) keyParts.push(`interval=${interval}`);
-      return keyParts.join(':');
+      return keyParts.join(":");
     },
   })
   async getSalesAnalytics(dateFrom?: Date, dateTo?: Date, interval?: string) {
     // Simulate complex analytics query
-    console.log(`Calculating sales analytics: dateFrom=${dateFrom}, dateTo=${dateTo}, interval=${interval}`);
-    
+    console.log(
+      `Calculating sales analytics: dateFrom=${dateFrom}, dateTo=${dateTo}, interval=${interval}`,
+    );
+
     return {
       totalSales: 10000,
       totalOrders: 100,

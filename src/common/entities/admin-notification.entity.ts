@@ -1,36 +1,41 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+} from "typeorm";
 
 export enum NotificationSeverity {
-  INFO = 'info',
-  WARNING = 'warning',
-  ERROR = 'error',
-  SUCCESS = 'success'
+  INFO = "info",
+  WARNING = "warning",
+  ERROR = "error",
+  SUCCESS = "success",
 }
 
-@Entity('admin_notifications')
+@Entity("admin_notifications")
 export class AdminNotification {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: "varchar" })
   type: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: "varchar" })
   title: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: "text" })
   message: string;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: "jsonb", nullable: true })
   data: Record<string, any>;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ type: "boolean", default: false })
   read: boolean;
 
-  @Column({ 
-    type: 'enum', 
-    enum: NotificationSeverity, 
-    default: NotificationSeverity.INFO 
+  @Column({
+    type: "enum",
+    enum: NotificationSeverity,
+    default: NotificationSeverity.INFO,
   })
   severity: NotificationSeverity;
 

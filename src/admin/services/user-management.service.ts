@@ -1,12 +1,16 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-import { Order } from '../../orders/entities/order.entity';
-import { CacheService } from '../../common/cache/cache.service';
-import { CacheKeyGenerator } from '../../common/cache/cache-key-generator.service';
-import { CACHE_KEYS, CACHE_TTL, CACHE_PATTERNS } from '../../common/cache/constants/cache.constants';
-import { AdminAuditService } from './admin-audit.service';
+import { Injectable, NotFoundException, Logger } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository, SelectQueryBuilder } from "typeorm";
+import { User } from "../../users/entities/user.entity";
+import { Order } from "../../orders/entities/order.entity";
+import { CacheService } from "../../common/cache/cache.service";
+import { CacheKeyGenerator } from "../../common/cache/cache-key-generator.service";
+import {
+  CACHE_KEYS,
+  CACHE_TTL,
+  CACHE_PATTERNS,
+} from "../../common/cache/constants/cache.constants";
+import { AdminAuditService } from "./admin-audit.service";
 import {
   GetUsersQueryDto,
   UpdateUserStatusDto,
@@ -16,8 +20,7 @@ import {
   UserAnalyticsDto,
   GetUserAnalyticsQueryDto,
   UserStatus,
-} from '../dto/user-management.dto';
-import { Role } from '../../common/decorators/roles.decorator';
+} from "../dto/user-management.dto";
 
 @Injectable()
 export class UserManagementService {
@@ -46,11 +49,12 @@ export class UserManagementService {
         date_to: query.date_to,
         sort_by: query.sort_by,
         sort_order: query.sort_order,
-      }
+      },
     );
 
     // Try to get from cache first
-    const cachedResult = await this.cacheService.get<PaginatedUsersDto>(cacheKey);
+    const cachedResult =
+      await this.cacheService.get<PaginatedUsersDto>(cacheKey);
     if (cachedResult) {
       this.logger.debug(`Users list served from cache: ${cacheKey}`);
       return cachedResult;
@@ -58,10 +62,10 @@ export class UserManagementService {
 
     // Build query
     const queryBuilder = this.buildUsersQuery(query);
-    
+
     // Get total count
     const total = await queryBuilder.getCount();
-    
+
     // Apply pagination
     const offset = (query.page - 1) * query.limit;
     queryBuilder.skip(offset).take(query.limit);
@@ -71,7 +75,7 @@ export class UserManagementService {
 
     // Transform to DTOs with additional data
     const userDtos = await Promise.all(
-      users.map(user => this.transformToUserListItem(user))
+      users.map((user) => this.transformToUserListItem(user)),
     );
 
     const result: PaginatedUsersDto = {
@@ -90,7 +94,10 @@ export class UserManagementService {
   }
 
   async getUserDetails(id: string): Promise<UserDetailsDto> {
-    const cacheKey = this.cacheKeyGenerator.generateSimpleKey(CACHE_KEYS.USER_DETAILS, id);
+    const cacheKey = this.cacheKeyGenerator.generateSimpleKey(
+      CACHE_KEYS.USER_DETAILS,
+      id,
+    );
 
     // Try to get from cache first
     const cachedResult = await this.cacheService.get<UserDetailsDto>(cacheKey);
@@ -102,7 +109,7 @@ export class UserManagementService {
     // Find user with relations
     const user = await this.userRepository.findOne({
       where: { id },
-      relations: ['addresses', 'orders'],
+      relations: ["addresses", "orders"],
     });
 
     if (!user) {
@@ -114,7 +121,7 @@ export class UserManagementService {
     const recentOrders = await this.getUserRecentOrders(id, 5);
 
     const userDetails: UserDetailsDto = {
-      ...await this.transformToUserListItem(user),
+      ...(await this.transformToUserListItem(user)),
       metadata: user.metadata,
       addresses: user.addresses || [],
       recent_orders: recentOrders,
@@ -131,7 +138,11 @@ export class UserManagementService {
     return userDetails;
   }
 
-  async updateUserStatus(id: string, updateDto: UpdateUserStatusDto, adminId: string): Promise<void> {
+  async updateUserStatus(
+    id: string,
+    updateDto: UpdateUserStatusDto,
+    adminId: string,
+  ): Promise<void> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -149,40 +160,47 @@ export class UserManagementService {
     // Log the action
     await this.auditService.logAction({
       adminId: adminId,
-      action: 'UPDATE_USER_STATUS',
-      resource: 'user',
+      action: "UPDATE_USER_STATUS",
+      resource: "user",
       resourceId: id,
-      description: `Updated user status from ${oldStatus ? 'active' : 'inactive'} to ${updateDto.status}`,
+      description: `Updated user status from ${oldStatus ? "active" : "inactive"} to ${updateDto.status}`,
       metadata: {
-        old_status: oldStatus ? 'active' : 'inactive',
+        old_status: oldStatus ? "active" : "inactive",
         new_status: updateDto.status,
         reason: updateDto.reason,
       },
-      ipAddress: '0.0.0.0', // This should be passed from the request context
+      ipAddress: "0.0.0.0", // This should be passed from the request context
     });
 
     // Invalidate related cache entries
     await this.invalidateUserCaches(id);
 
-    this.logger.log(`User ${id} status updated from ${oldStatus} to ${updateDto.status} by admin ${adminId}`);
+    this.logger.log(
+      `User ${id} status updated from ${oldStatus} to ${updateDto.status} by admin ${adminId}`,
+    );
   }
 
-  async getUserAnalytics(query: GetUserAnalyticsQueryDto): Promise<UserAnalyticsDto> {
+  async getUserAnalytics(
+    query: GetUserAnalyticsQueryDto,
+  ): Promise<UserAnalyticsDto> {
     const cacheKey = this.cacheKeyGenerator.generateAnalyticsKey(
       CACHE_KEYS.USER_ANALYTICS,
       query.date_from ? new Date(query.date_from) : undefined,
       query.date_to ? new Date(query.date_to) : undefined,
-      query.interval
+      query.interval,
     );
 
     // Try to get from cache first
-    const cachedResult = await this.cacheService.get<UserAnalyticsDto>(cacheKey);
+    const cachedResult =
+      await this.cacheService.get<UserAnalyticsDto>(cacheKey);
     if (cachedResult) {
       this.logger.debug(`User analytics served from cache: ${cacheKey}`);
       return cachedResult;
     }
 
-    const dateFrom = query.date_from ? new Date(query.date_from) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
+    const dateFrom = query.date_from
+      ? new Date(query.date_from)
+      : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
     const dateTo = query.date_to ? new Date(query.date_to) : new Date();
 
     // Get basic user counts
@@ -194,24 +212,43 @@ export class UserManagementService {
 
     // Get new users counts
     const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
     const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const [newUsersToday, newUsersThisWeek, newUsersThisMonth] = await Promise.all([
-      this.userRepository.count({ where: { created_at: { $gte: todayStart } as any } }),
-      this.userRepository.count({ where: { created_at: { $gte: weekStart } as any } }),
-      this.userRepository.count({ where: { created_at: { $gte: monthStart } as any } }),
-    ]);
+    const [newUsersToday, newUsersThisWeek, newUsersThisMonth] =
+      await Promise.all([
+        this.userRepository.count({
+          where: { created_at: { $gte: todayStart } as any },
+        }),
+        this.userRepository.count({
+          where: { created_at: { $gte: weekStart } as any },
+        }),
+        this.userRepository.count({
+          where: { created_at: { $gte: monthStart } as any },
+        }),
+      ]);
 
     // Get registration trend
-    const registrationTrend = await this.getRegistrationTrend(dateFrom, dateTo, query.interval);
+    const registrationTrend = await this.getRegistrationTrend(
+      dateFrom,
+      dateTo,
+      query.interval,
+    );
 
     // Get role distribution
     const roleDistribution = await this.getRoleDistribution();
 
     // Get activity metrics (simplified for now)
-    const activityMetrics = await this.getActivityMetrics(dateFrom, dateTo, query.interval);
+    const activityMetrics = await this.getActivityMetrics(
+      dateFrom,
+      dateTo,
+      query.interval,
+    );
 
     const analytics: UserAnalyticsDto = {
       total_users: totalUsers,
@@ -234,39 +271,48 @@ export class UserManagementService {
   }
 
   private buildUsersQuery(query: GetUsersQueryDto): SelectQueryBuilder<User> {
-    const queryBuilder = this.userRepository.createQueryBuilder('user');
+    const queryBuilder = this.userRepository.createQueryBuilder("user");
 
     // Add search filter
     if (query.search) {
       queryBuilder.andWhere(
-        '(user.name ILIKE :search OR user.email ILIKE :search)',
-        { search: `%${query.search}%` }
+        "(user.name ILIKE :search OR user.email ILIKE :search)",
+        { search: `%${query.search}%` },
       );
     }
 
     // Add role filter
     if (query.role) {
-      queryBuilder.andWhere('user.role = :role', { role: query.role });
+      queryBuilder.andWhere("user.role = :role", { role: query.role });
     }
 
     // Add status filter
     if (query.status) {
       const isActive = query.status === UserStatus.ACTIVE;
-      queryBuilder.andWhere('user.is_active = :isActive', { isActive });
+      queryBuilder.andWhere("user.is_active = :isActive", { isActive });
     }
 
     // Add date range filter
     if (query.date_from) {
-      queryBuilder.andWhere('user.created_at >= :dateFrom', { dateFrom: query.date_from });
+      queryBuilder.andWhere("user.created_at >= :dateFrom", {
+        dateFrom: query.date_from,
+      });
     }
     if (query.date_to) {
-      queryBuilder.andWhere('user.created_at <= :dateTo', { dateTo: query.date_to });
+      queryBuilder.andWhere("user.created_at <= :dateTo", {
+        dateTo: query.date_to,
+      });
     }
 
     // Add sorting
-    const sortField = query.sort_by === 'name' ? 'user.name' : 
-                     query.sort_by === 'email' ? 'user.email' : 'user.created_at';
-    const sortOrder = query.sort_order?.toUpperCase() as 'ASC' | 'DESC' || 'DESC';
+    const sortField =
+      query.sort_by === "name"
+        ? "user.name"
+        : query.sort_by === "email"
+          ? "user.email"
+          : "user.created_at";
+    const sortOrder =
+      (query.sort_order?.toUpperCase() as "ASC" | "DESC") || "DESC";
     queryBuilder.orderBy(sortField, sortOrder);
 
     return queryBuilder;
@@ -293,16 +339,18 @@ export class UserManagementService {
 
   private async getUserOrderStats(userId: string) {
     const stats = await this.orderRepository
-      .createQueryBuilder('order')
+      .createQueryBuilder("order")
       .select([
-        'COUNT(*) as total_orders',
-        'COALESCE(SUM(order.total), 0) as total_spent',
-        'AVG(order.total) as average_order_value',
-        'MIN(order.created_at) as first_order_date',
-        'MAX(order.created_at) as last_order_date',
+        "COUNT(*) as total_orders",
+        "COALESCE(SUM(order.total), 0) as total_spent",
+        "AVG(order.total) as average_order_value",
+        "MIN(order.created_at) as first_order_date",
+        "MAX(order.created_at) as last_order_date",
       ])
-      .where('order.user_id = :userId', { userId })
-      .andWhere('order.status IN (:...statuses)', { statuses: ['delivered', 'completed'] })
+      .where("order.user_id = :userId", { userId })
+      .andWhere("order.status IN (:...statuses)", {
+        statuses: ["delivered", "completed"],
+      })
       .getRawOne();
 
     return {
@@ -317,29 +365,37 @@ export class UserManagementService {
   private async getUserRecentOrders(userId: string, limit: number = 5) {
     return this.orderRepository.find({
       where: { user_id: userId },
-      order: { created_at: 'DESC' },
+      order: { created_at: "DESC" },
       take: limit,
-      select: ['id', 'total', 'status', 'created_at'],
+      select: ["id", "total", "status", "created_at"],
     });
   }
 
-  private async getRegistrationTrend(dateFrom: Date, dateTo: Date, interval: string) {
-    const dateFormat = interval === 'month' ? '%Y-%m' : 
-                      interval === 'week' ? '%Y-%u' : '%Y-%m-%d';
+  private async getRegistrationTrend(
+    dateFrom: Date,
+    dateTo: Date,
+    interval: string,
+  ) {
+    const dateFormat =
+      interval === "month"
+        ? "%Y-%m"
+        : interval === "week"
+          ? "%Y-%u"
+          : "%Y-%m-%d";
 
     const result = await this.userRepository
-      .createQueryBuilder('user')
+      .createQueryBuilder("user")
       .select([
         `TO_CHAR(user.created_at, '${dateFormat}') as date`,
-        'COUNT(*) as count',
+        "COUNT(*) as count",
       ])
-      .where('user.created_at >= :dateFrom', { dateFrom })
-      .andWhere('user.created_at <= :dateTo', { dateTo })
+      .where("user.created_at >= :dateFrom", { dateFrom })
+      .andWhere("user.created_at <= :dateTo", { dateTo })
       .groupBy(`TO_CHAR(user.created_at, '${dateFormat}')`)
       .orderBy(`TO_CHAR(user.created_at, '${dateFormat}')`)
       .getRawMany();
 
-    return result.map(item => ({
+    return result.map((item) => ({
       date: item.date,
       count: parseInt(item.count),
     }));
@@ -347,42 +403,51 @@ export class UserManagementService {
 
   private async getRoleDistribution() {
     const result = await this.userRepository
-      .createQueryBuilder('user')
-      .select(['user.role as role', 'COUNT(*) as count'])
-      .groupBy('user.role')
+      .createQueryBuilder("user")
+      .select(["user.role as role", "COUNT(*) as count"])
+      .groupBy("user.role")
       .getRawMany();
 
     const total = result.reduce((sum, item) => sum + parseInt(item.count), 0);
 
-    return result.map(item => ({
+    return result.map((item) => ({
       role: item.role,
       count: parseInt(item.count),
-      percentage: total > 0 ? Math.round((parseInt(item.count) / total) * 100) : 0,
+      percentage:
+        total > 0 ? Math.round((parseInt(item.count) / total) * 100) : 0,
     }));
   }
 
-  private async getActivityMetrics(dateFrom: Date, dateTo: Date, interval: string) {
+  private async getActivityMetrics(
+    dateFrom: Date,
+    dateTo: Date,
+    interval: string,
+  ) {
     // This is a simplified implementation
     // In a real application, you would track user activity/login events
-    const dateFormat = interval === 'month' ? '%Y-%m' : 
-                      interval === 'week' ? '%Y-%u' : '%Y-%m-%d';
+    const dateFormat =
+      interval === "month"
+        ? "%Y-%m"
+        : interval === "week"
+          ? "%Y-%u"
+          : "%Y-%m-%d";
 
     const result = await this.userRepository
-      .createQueryBuilder('user')
+      .createQueryBuilder("user")
       .select([
         `TO_CHAR(user.last_login_at, '${dateFormat}') as period`,
-        'COUNT(DISTINCT user.id) as active_users',
-        'COUNT(*) as login_count',
+        "COUNT(DISTINCT user.id) as active_users",
+        "COUNT(*) as login_count",
       ])
-      .where('user.last_login_at >= :dateFrom', { dateFrom })
-      .andWhere('user.last_login_at <= :dateTo', { dateTo })
-      .andWhere('user.last_login_at IS NOT NULL')
+      .where("user.last_login_at >= :dateFrom", { dateFrom })
+      .andWhere("user.last_login_at <= :dateTo", { dateTo })
+      .andWhere("user.last_login_at IS NOT NULL")
       .groupBy(`TO_CHAR(user.last_login_at, '${dateFormat}')`)
       .orderBy(`TO_CHAR(user.last_login_at, '${dateFormat}')`)
       .getRawMany();
 
-    return result.map(item => ({
-      period: item.period || 'N/A',
+    return result.map((item) => ({
+      period: item.period || "N/A",
       active_users: parseInt(item.active_users) || 0,
       login_count: parseInt(item.login_count) || 0,
     }));
@@ -392,16 +457,19 @@ export class UserManagementService {
     try {
       // Invalidate all user-related caches
       await this.cacheService.delPattern(CACHE_PATTERNS.USERS);
-      
+
       if (userId) {
         // Invalidate specific user cache
-        const userDetailsCacheKey = this.cacheKeyGenerator.generateSimpleKey(CACHE_KEYS.USER_DETAILS, userId);
+        const userDetailsCacheKey = this.cacheKeyGenerator.generateSimpleKey(
+          CACHE_KEYS.USER_DETAILS,
+          userId,
+        );
         await this.cacheService.del(userDetailsCacheKey);
       }
 
-      this.logger.debug('User caches invalidated');
+      this.logger.debug("User caches invalidated");
     } catch (error) {
-      this.logger.error('Failed to invalidate user caches:', error);
+      this.logger.error("Failed to invalidate user caches:", error);
     }
   }
 }

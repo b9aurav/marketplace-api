@@ -3,9 +3,9 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-} from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+} from "@nestjs/common";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
 
 export interface Response<T> {
   status: string;
@@ -15,19 +15,20 @@ export interface Response<T> {
 
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<Response<T>> {
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<Response<T>> {
     return next.handle().pipe(
-      map(data => {
-        const response = context.switchToHttp().getResponse();
-        
+      map((data) => {
         // Extract pagination if it exists
         const pagination = data && data.pagination ? data.pagination : null;
         const responseData = pagination ? data.data : data;
-        
+
         return {
-          status: 'success',
+          status: "success",
           data: responseData,
-          message: '',
+          message: "",
           ...(pagination && { pagination }),
         };
       }),

@@ -1,7 +1,7 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { ConfigService } from '@nestjs/config';
-import { supabaseConfig } from '../config/supabase.config';
+import { Injectable, OnModuleInit } from "@nestjs/common";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { ConfigService } from "@nestjs/config";
+import { supabaseConfig } from "../config/supabase.config";
 
 @Injectable()
 export class SupabaseService implements OnModuleInit {
@@ -12,7 +12,9 @@ export class SupabaseService implements OnModuleInit {
   onModuleInit() {
     const config = supabaseConfig(this.configService);
     if (!config.supabaseUrl || !config.supabaseKey) {
-      throw new Error('Supabase URL and key must be provided in environment variables');
+      throw new Error(
+        "Supabase URL and key must be provided in environment variables",
+      );
     }
     this.supabase = createClient(config.supabaseUrl, config.supabaseKey);
   }
@@ -45,7 +47,10 @@ export class SupabaseService implements OnModuleInit {
   }
 
   async getUser(token: string) {
-    const { data: { user }, error } = await this.supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error,
+    } = await this.supabase.auth.getUser(token);
     if (error) throw error;
     return user;
   }
@@ -64,17 +69,19 @@ export class SupabaseService implements OnModuleInit {
 
   async getPublicKey() {
     try {
-      const url = `${this.configService.get('SUPABASE_URL')}/.well-known/jwks.json`;
-      console.log('Fetching public key from:', url);
+      const url = `${this.configService.get("SUPABASE_URL")}/.well-known/jwks.json`;
+      console.log("Fetching public key from:", url);
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(`Failed to fetch public key: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch public key: ${response.status} ${response.statusText}`,
+        );
       }
       const data = await response.json();
       return { data };
     } catch (error) {
-      console.error('Error fetching public key:', error);
+      console.error("Error fetching public key:", error);
       throw error;
     }
   }
-} 
+}

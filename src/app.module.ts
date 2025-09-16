@@ -1,23 +1,23 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { APP_GUARD } from "@nestjs/core";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
 // Common modules
-import { CacheModule } from './common/cache/cache.module';
+import { CacheModule } from "./common/cache/cache.module";
 
 // Modules
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { ProductsModule } from './products/products.module';
-import { CartModule } from './cart/cart.module';
-import { OrdersModule } from './orders/orders.module';
-import { PaymentsModule } from './payments/payments.module';
-import { RecommendationsModule } from './recommendations/recommendations.module';
-import { AdminModule } from './admin/admin.module';
-import { WebhooksModule } from './webhooks/webhooks.module';
-import { SupabaseModule } from './supabase/supabase.module';
+import { AuthModule } from "./auth/auth.module";
+import { UsersModule } from "./users/users.module";
+import { ProductsModule } from "./products/products.module";
+import { CartModule } from "./cart/cart.module";
+import { OrdersModule } from "./orders/orders.module";
+import { PaymentsModule } from "./payments/payments.module";
+import { RecommendationsModule } from "./recommendations/recommendations.module";
+import { AdminModule } from "./admin/admin.module";
+import { WebhooksModule } from "./webhooks/webhooks.module";
+import { SupabaseModule } from "./supabase/supabase.module";
 
 @Module({
   imports: [
@@ -28,16 +28,16 @@ import { SupabaseModule } from './supabase/supabase.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST', 'localhost'),
-        port: configService.get('DB_PORT', 5432),
-        username: configService.get('DB_USERNAME', 'postgres'),
-        password: configService.get('DB_PASSWORD', 'postgres'),
-        database: configService.get('DB_DATABASE', 'marketplace'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        migrations: [__dirname + '/migrations/*{.ts,.js}'],
-        synchronize: configService.get('NODE_ENV') !== 'production',
-        migrationsRun: configService.get('NODE_ENV') === 'production',
+        type: "postgres",
+        host: configService.get("DB_HOST", "localhost"),
+        port: configService.get("DB_PORT", 5432),
+        username: configService.get("DB_USERNAME", "postgres"),
+        password: configService.get("DB_PASSWORD", "postgres"),
+        database: configService.get("DB_DATABASE", "marketplace"),
+        entities: [__dirname + "/**/*.entity{.ts,.js}"],
+        migrations: [__dirname + "/migrations/*{.ts,.js}"],
+        synchronize: configService.get("NODE_ENV") !== "production",
+        migrationsRun: configService.get("NODE_ENV") === "production",
       }),
     }),
     ThrottlerModule.forRootAsync({
@@ -46,7 +46,7 @@ import { SupabaseModule } from './supabase/supabase.module';
       useFactory: (configService: ConfigService) => [
         {
           ttl: 60000,
-          limit: configService.get('THROTTLE_LIMIT', 100),
+          limit: configService.get("THROTTLE_LIMIT", 100),
         },
       ],
     }),

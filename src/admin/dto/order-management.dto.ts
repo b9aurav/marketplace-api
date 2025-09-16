@@ -9,22 +9,25 @@ import {
   IsUUID,
   IsNumber,
   IsPositive,
-  ValidateNested,
-  IsArray,
-} from 'class-validator';
-import { Type, Transform } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { OrderStatus } from '../../orders/entities/order.entity';
+} from "class-validator";
+import { Type, Transform } from "class-transformer";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { OrderStatus } from "../../orders/entities/order.entity";
 
 export class GetOrdersQueryDto {
-  @ApiPropertyOptional({ description: 'Page number', minimum: 1, default: 1 })
+  @ApiPropertyOptional({ description: "Page number", minimum: 1, default: 1 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number = 1;
 
-  @ApiPropertyOptional({ description: 'Items per page', minimum: 1, maximum: 100, default: 10 })
+  @ApiPropertyOptional({
+    description: "Items per page",
+    minimum: 1,
+    maximum: 100,
+    default: 10,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -32,125 +35,133 @@ export class GetOrdersQueryDto {
   @Max(100)
   limit?: number = 10;
 
-  @ApiPropertyOptional({ description: 'Search by order ID, user email, or tracking number' })
+  @ApiPropertyOptional({
+    description: "Search by order ID, user email, or tracking number",
+  })
   @IsOptional()
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ enum: OrderStatus, description: 'Filter by order status' })
+  @ApiPropertyOptional({
+    enum: OrderStatus,
+    description: "Filter by order status",
+  })
   @IsOptional()
   @IsEnum(OrderStatus)
   status?: OrderStatus;
 
-  @ApiPropertyOptional({ description: 'Filter by user ID' })
+  @ApiPropertyOptional({ description: "Filter by user ID" })
   @IsOptional()
   @IsUUID()
   user_id?: string;
 
-  @ApiPropertyOptional({ description: 'Filter by payment method' })
+  @ApiPropertyOptional({ description: "Filter by payment method" })
   @IsOptional()
   @IsString()
   payment_method?: string;
 
-  @ApiPropertyOptional({ description: 'Minimum order total' })
+  @ApiPropertyOptional({ description: "Minimum order total" })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @IsPositive()
   min_total?: number;
 
-  @ApiPropertyOptional({ description: 'Maximum order total' })
+  @ApiPropertyOptional({ description: "Maximum order total" })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @IsPositive()
   max_total?: number;
 
-  @ApiPropertyOptional({ description: 'Start date (YYYY-MM-DD)' })
+  @ApiPropertyOptional({ description: "Start date (YYYY-MM-DD)" })
   @IsOptional()
   @IsDateString()
   date_from?: string;
 
-  @ApiPropertyOptional({ description: 'End date (YYYY-MM-DD)' })
+  @ApiPropertyOptional({ description: "End date (YYYY-MM-DD)" })
   @IsOptional()
   @IsDateString()
   date_to?: string;
 
-  @ApiPropertyOptional({ 
-    enum: ['created_at', 'updated_at', 'total', 'status'], 
-    description: 'Sort field',
-    default: 'created_at'
+  @ApiPropertyOptional({
+    enum: ["created_at", "updated_at", "total", "status"],
+    description: "Sort field",
+    default: "created_at",
   })
   @IsOptional()
-  @IsEnum(['created_at', 'updated_at', 'total', 'status'])
-  sort_by?: string = 'created_at';
+  @IsEnum(["created_at", "updated_at", "total", "status"])
+  sort_by?: string = "created_at";
 
-  @ApiPropertyOptional({ 
-    enum: ['asc', 'desc'], 
-    description: 'Sort order',
-    default: 'desc'
+  @ApiPropertyOptional({
+    enum: ["asc", "desc"],
+    description: "Sort order",
+    default: "desc",
   })
   @IsOptional()
-  @IsEnum(['asc', 'desc'])
-  sort_order?: string = 'desc';
+  @IsEnum(["asc", "desc"])
+  sort_order?: string = "desc";
 }
 
 export class UpdateOrderStatusDto {
-  @ApiProperty({ enum: OrderStatus, description: 'New order status' })
+  @ApiProperty({ enum: OrderStatus, description: "New order status" })
   @IsEnum(OrderStatus)
   status: OrderStatus;
 
-  @ApiPropertyOptional({ description: 'Admin notes for status change' })
+  @ApiPropertyOptional({ description: "Admin notes for status change" })
   @IsOptional()
   @IsString()
   admin_notes?: string;
 
-  @ApiPropertyOptional({ description: 'Tracking number (for shipped status)' })
+  @ApiPropertyOptional({ description: "Tracking number (for shipped status)" })
   @IsOptional()
   @IsString()
   tracking_number?: string;
 }
 
 export class ProcessRefundDto {
-  @ApiProperty({ description: 'Refund amount', minimum: 0.01 })
+  @ApiProperty({ description: "Refund amount", minimum: 0.01 })
   @IsNumber()
   @IsPositive()
   amount: number;
 
-  @ApiProperty({ description: 'Reason for refund' })
+  @ApiProperty({ description: "Reason for refund" })
   @IsString()
   reason: string;
 
-  @ApiPropertyOptional({ description: 'Admin notes for refund' })
+  @ApiPropertyOptional({ description: "Admin notes for refund" })
   @IsOptional()
   @IsString()
   admin_notes?: string;
 
-  @ApiPropertyOptional({ description: 'Notify customer via email', default: true })
+  @ApiPropertyOptional({
+    description: "Notify customer via email",
+    default: true,
+  })
   @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true)
+  @Transform(({ value }) => value === "true" || value === true)
   notify_customer?: boolean = true;
 }
 
 export class OrderAnalyticsQueryDto {
-  @ApiProperty({ description: 'Start date (YYYY-MM-DD)' })
+  @ApiProperty({ description: "Start date (YYYY-MM-DD)" })
   @IsDateString()
   date_from: string;
 
-  @ApiProperty({ description: 'End date (YYYY-MM-DD)' })
+  @ApiProperty({ description: "End date (YYYY-MM-DD)" })
   @IsDateString()
   date_to: string;
 
-  @ApiPropertyOptional({ 
-    enum: ['day', 'week', 'month'], 
-    description: 'Grouping interval',
-    default: 'day'
+  @ApiPropertyOptional({
+    enum: ["day", "week", "month"],
+    description: "Grouping interval",
+    default: "day",
   })
   @IsOptional()
-  @IsEnum(['day', 'week', 'month'])
-  interval?: string = 'day';
+  @IsEnum(["day", "week", "month"])
+  interval?: string = "day";
 
-  @ApiPropertyOptional({ description: 'Filter by specific status' })
+  @ApiPropertyOptional({ description: "Filter by specific status" })
   @IsOptional()
   @IsEnum(OrderStatus)
   status?: OrderStatus;

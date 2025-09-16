@@ -1,13 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AdminController } from './admin.controller';
-import { AdminService } from './admin.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from '../users/entities/user.entity';
-import { Order } from '../orders/entities/order.entity';
-import { Product } from '../products/entities/product.entity';
-import { Role } from '../common/decorators/roles.decorator';
+import { Test, TestingModule } from "@nestjs/testing";
+import { AdminController } from "./admin.controller";
+import { AdminService } from "./admin.service";
+import { getRepositoryToken } from "@nestjs/typeorm";
+import { User } from "../users/entities/user.entity";
+import { Order } from "../orders/entities/order.entity";
+import { Product } from "../products/entities/product.entity";
+import { Role } from "../common/decorators/roles.decorator";
 
-describe('AdminController', () => {
+describe("AdminController", () => {
   let controller: AdminController;
   let service: AdminService;
 
@@ -65,12 +65,12 @@ describe('AdminController', () => {
     service = module.get<AdminService>(AdminService);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 
-  describe('getDashboardSummary', () => {
-    it('should return dashboard summary', async () => {
+  describe("getDashboardSummary", () => {
+    it("should return dashboard summary", async () => {
       const expectedSummary = {
         total_sales: 1000,
         active_users: 10,
@@ -78,49 +78,55 @@ describe('AdminController', () => {
         total_products: 50,
       };
 
-      jest.spyOn(service, 'getDashboardSummary').mockResolvedValue(expectedSummary);
+      jest
+        .spyOn(service, "getDashboardSummary")
+        .mockResolvedValue(expectedSummary);
 
       const result = await controller.getDashboardSummary();
       expect(result).toEqual(expectedSummary);
     });
   });
 
-  describe('getSalesAnalytics', () => {
-    it('should return sales analytics for last 7 days by default', async () => {
+  describe("getSalesAnalytics", () => {
+    it("should return sales analytics for last 7 days by default", async () => {
       const expectedAnalytics = {
-        dates: ['2024-01-01', '2024-01-02'],
+        dates: ["2024-01-01", "2024-01-02"],
         revenue: [1000, 2000],
-        range: 'last_7_days',
+        range: "last_7_days",
       };
 
-      jest.spyOn(service, 'getSalesAnalytics').mockResolvedValue(expectedAnalytics);
+      jest
+        .spyOn(service, "getSalesAnalytics")
+        .mockResolvedValue(expectedAnalytics);
 
       const result = await controller.getSalesAnalytics();
       expect(result).toEqual(expectedAnalytics);
     });
 
-    it('should return sales analytics for specified range', async () => {
+    it("should return sales analytics for specified range", async () => {
       const expectedAnalytics = {
-        dates: ['2024-01-01', '2024-01-02'],
+        dates: ["2024-01-01", "2024-01-02"],
         revenue: [1000, 2000],
-        range: 'last_30_days',
+        range: "last_30_days",
       };
 
-      jest.spyOn(service, 'getSalesAnalytics').mockResolvedValue(expectedAnalytics);
+      jest
+        .spyOn(service, "getSalesAnalytics")
+        .mockResolvedValue(expectedAnalytics);
 
-      const result = await controller.getSalesAnalytics('last_30_days');
+      const result = await controller.getSalesAnalytics("last_30_days");
       expect(result).toEqual(expectedAnalytics);
     });
   });
 
-  describe('getUsers', () => {
-    it('should return users list without search', async () => {
+  describe("getUsers", () => {
+    it("should return users list without search", async () => {
       const expectedUsers = {
         users: [
           {
-            id: '1',
-            name: 'Test User',
-            email: 'test@example.com',
+            id: "1",
+            name: "Test User",
+            email: "test@example.com",
             created_at: new Date(),
             role: Role.USER,
             order_count: 2,
@@ -129,19 +135,19 @@ describe('AdminController', () => {
         total: 1,
       };
 
-      jest.spyOn(service, 'getUsers').mockResolvedValue(expectedUsers);
+      jest.spyOn(service, "getUsers").mockResolvedValue(expectedUsers);
 
       const result = await controller.getUsers();
       expect(result).toEqual(expectedUsers);
     });
 
-    it('should return filtered users with search', async () => {
+    it("should return filtered users with search", async () => {
       const expectedUsers = {
         users: [
           {
-            id: '1',
-            name: 'Test User',
-            email: 'test@example.com',
+            id: "1",
+            name: "Test User",
+            email: "test@example.com",
             created_at: new Date(),
             role: Role.USER,
             order_count: 2,
@@ -150,33 +156,37 @@ describe('AdminController', () => {
         total: 1,
       };
 
-      jest.spyOn(service, 'getUsers').mockResolvedValue(expectedUsers);
+      jest.spyOn(service, "getUsers").mockResolvedValue(expectedUsers);
 
-      const result = await controller.getUsers('test');
+      const result = await controller.getUsers("test");
       expect(result).toEqual(expectedUsers);
     });
   });
 
-  describe('blockUser', () => {
-    it('should block user successfully', async () => {
-      const userId = '1';
+  describe("blockUser", () => {
+    it("should block user successfully", async () => {
+      const userId = "1";
       const expectedResponse = {
-        message: 'User blocked successfully',
+        message: "User blocked successfully",
         user_id: userId,
       };
 
-      jest.spyOn(service, 'blockUser').mockResolvedValue(expectedResponse);
+      jest.spyOn(service, "blockUser").mockResolvedValue(expectedResponse);
 
       const result = await controller.blockUser(userId);
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw error if user not found', async () => {
-      const userId = 'non-existent';
-      
-      jest.spyOn(service, 'blockUser').mockRejectedValue(new Error('User not found'));
+    it("should throw error if user not found", async () => {
+      const userId = "non-existent";
 
-      await expect(controller.blockUser(userId)).rejects.toThrow('User not found');
+      jest
+        .spyOn(service, "blockUser")
+        .mockRejectedValue(new Error("User not found"));
+
+      await expect(controller.blockUser(userId)).rejects.toThrow(
+        "User not found",
+      );
     });
   });
-}); 
+});

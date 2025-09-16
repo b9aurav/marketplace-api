@@ -1,5 +1,5 @@
-import { ProductManagementService } from '../services/product-management.service';
-import { ProductStatus } from '../../products/entities/product.entity';
+import { ProductManagementService } from "../services/product-management.service";
+import { ProductStatus } from "../../products/entities/product.entity";
 import {
   GetProductsQueryDto,
   AdminCreateProductDto,
@@ -9,21 +9,29 @@ import {
   ExportProductsDto,
   ProductDetailsDto,
   ProductAnalyticsDto,
-  PaginatedProductsDto
-} from '../dto/product-management.dto';
+  PaginatedProductsDto,
+} from "../dto/product-management.dto";
 
 // Create a simple controller class for testing without decorators
 class TestProductManagementController {
-  constructor(private readonly productManagementService: ProductManagementService) {}
+  constructor(
+    private readonly productManagementService: ProductManagementService,
+  ) {}
 
   async getProducts(query: GetProductsQueryDto): Promise<PaginatedProductsDto> {
     return this.productManagementService.getProducts(query);
   }
 
-  async getProductAnalytics(dateFrom?: string, dateeTo?: string): Promise<ProductAnalyticsDto> {
+  async getProductAnalytics(
+    dateFrom?: string,
+    dateeTo?: string,
+  ): Promise<ProductAnalyticsDto> {
     const dateFromObj = dateFrom ? new Date(dateFrom) : undefined;
     const dateToObj = dateeTo ? new Date(dateeTo) : undefined;
-    return this.productManagementService.getProductAnalytics(dateFromObj, dateToObj);
+    return this.productManagementService.getProductAnalytics(
+      dateFromObj,
+      dateToObj,
+    );
   }
 
   async getProductDetails(id: string): Promise<ProductDetailsDto> {
@@ -34,7 +42,10 @@ class TestProductManagementController {
     return this.productManagementService.createProduct(data);
   }
 
-  async updateProduct(id: string, data: AdminUpdateProductDto): Promise<ProductDetailsDto> {
+  async updateProduct(
+    id: string,
+    data: AdminUpdateProductDto,
+  ): Promise<ProductDetailsDto> {
     return this.productManagementService.updateProduct(id, data);
   }
 
@@ -42,49 +53,52 @@ class TestProductManagementController {
     return this.productManagementService.deleteProduct(id);
   }
 
-  async updateInventory(id: string, data: UpdateInventoryDto): Promise<{ message: string }> {
+  async updateInventory(
+    id: string,
+    data: UpdateInventoryDto,
+  ): Promise<{ message: string }> {
     await this.productManagementService.updateInventory(id, data);
-    return { message: 'Inventory updated successfully' };
+    return { message: "Inventory updated successfully" };
   }
 
   async bulkAction(data: BulkProductActionDto): Promise<{ message: string }> {
     await this.productManagementService.bulkAction(data);
-    return { message: 'Bulk action completed successfully' };
+    return { message: "Bulk action completed successfully" };
   }
 
   async exportProducts(data: ExportProductsDto) {
-    return this.productManagementService.exportProducts(data);
+    return this.productManagementService.exportProducts();
   }
 }
 
-describe('ProductManagementController', () => {
+describe("ProductManagementController", () => {
   let controller: TestProductManagementController;
   let service: jest.Mocked<ProductManagementService>;
 
   const mockProductDetails: ProductDetailsDto = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-    name: 'Test Product',
-    description: 'Test Description',
+    id: "123e4567-e89b-12d3-a456-426614174000",
+    name: "Test Product",
+    description: "Test Description",
     price: 99.99,
     stock: 10,
-    images: ['image1.jpg'],
+    images: ["image1.jpg"],
     rating: 4.5,
-    sku: 'TEST-001',
+    sku: "TEST-001",
     weight: 1.5,
     dimensions: { length: 10, width: 5, height: 3 },
     status: ProductStatus.ACTIVE,
     featured: false,
-    tags: ['test'],
-    meta_title: 'Test Meta Title',
-    meta_description: 'Test Meta Description',
+    tags: ["test"],
+    meta_title: "Test Meta Title",
+    meta_description: "Test Meta Description",
     minimum_stock: 5,
     sales_count: 0,
-    category_id: 'cat-123',
+    category_id: "cat-123",
     created_at: new Date(),
     updated_at: new Date(),
     low_stock: false,
-    category_name: 'Test Category',
-    total_reviews: 0
+    category_name: "Test Category",
+    total_reviews: 0,
   };
 
   const mockPaginatedProducts: PaginatedProductsDto = {
@@ -93,8 +107,8 @@ describe('ProductManagementController', () => {
       total: 1,
       page: 1,
       limit: 10,
-      total_pages: 1
-    }
+      total_pages: 1,
+    },
   };
 
   const mockAnalytics: ProductAnalyticsDto = {
@@ -110,7 +124,12 @@ describe('ProductManagementController', () => {
     top_selling_products: [],
     category_distribution: [],
     stock_distribution: { in_stock: 95, low_stock: 10, out_of_stock: 5 },
-    price_distribution: { under_100: 30, between_100_500: 50, between_500_1000: 15, over_1000: 5 }
+    price_distribution: {
+      under_100: 30,
+      between_100_500: 50,
+      between_500_1000: 15,
+      over_1000: 5,
+    },
   };
 
   beforeEach(() => {
@@ -123,18 +142,18 @@ describe('ProductManagementController', () => {
       updateInventory: jest.fn(),
       bulkAction: jest.fn(),
       exportProducts: jest.fn(),
-      getProductAnalytics: jest.fn()
+      getProductAnalytics: jest.fn(),
     } as any;
 
     controller = new TestProductManagementController(service);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 
-  describe('getProducts', () => {
-    it('should return paginated products', async () => {
+  describe("getProducts", () => {
+    it("should return paginated products", async () => {
       const query: GetProductsQueryDto = { page: 1, limit: 10 };
       service.getProducts.mockResolvedValue(mockPaginatedProducts);
 
@@ -144,15 +163,15 @@ describe('ProductManagementController', () => {
       expect(service.getProducts).toHaveBeenCalledWith(query);
     });
 
-    it('should handle query parameters correctly', async () => {
+    it("should handle query parameters correctly", async () => {
       const query: GetProductsQueryDto = {
         page: 2,
         limit: 20,
-        search: 'test',
+        search: "test",
         status: ProductStatus.ACTIVE,
         featured: true,
         min_price: 10,
-        max_price: 100
+        max_price: 100,
       };
       service.getProducts.mockResolvedValue(mockPaginatedProducts);
 
@@ -162,33 +181,36 @@ describe('ProductManagementController', () => {
     });
   });
 
-  describe('getProductAnalytics', () => {
-    it('should return product analytics', async () => {
+  describe("getProductAnalytics", () => {
+    it("should return product analytics", async () => {
       service.getProductAnalytics.mockResolvedValue(mockAnalytics);
 
       const result = await controller.getProductAnalytics();
 
       expect(result).toEqual(mockAnalytics);
-      expect(service.getProductAnalytics).toHaveBeenCalledWith(undefined, undefined);
+      expect(service.getProductAnalytics).toHaveBeenCalledWith(
+        undefined,
+        undefined,
+      );
     });
 
-    it('should handle date parameters', async () => {
-      const dateFrom = '2023-01-01';
-      const dateTo = '2023-12-31';
+    it("should handle date parameters", async () => {
+      const dateFrom = "2023-01-01";
+      const dateTo = "2023-12-31";
       service.getProductAnalytics.mockResolvedValue(mockAnalytics);
 
       await controller.getProductAnalytics(dateFrom, dateTo);
 
       expect(service.getProductAnalytics).toHaveBeenCalledWith(
         new Date(dateFrom),
-        new Date(dateTo)
+        new Date(dateTo),
       );
     });
   });
 
-  describe('getProductDetails', () => {
-    it('should return product details', async () => {
-      const productId = '123e4567-e89b-12d3-a456-426614174000';
+  describe("getProductDetails", () => {
+    it("should return product details", async () => {
+      const productId = "123e4567-e89b-12d3-a456-426614174000";
       service.getProductDetails.mockResolvedValue(mockProductDetails);
 
       const result = await controller.getProductDetails(productId);
@@ -198,16 +220,16 @@ describe('ProductManagementController', () => {
     });
   });
 
-  describe('createProduct', () => {
-    it('should create a new product', async () => {
+  describe("createProduct", () => {
+    it("should create a new product", async () => {
       const createProductDto: AdminCreateProductDto = {
-        name: 'New Product',
-        description: 'New Product Description',
+        name: "New Product",
+        description: "New Product Description",
         price: 199.99,
         stock: 20,
-        images: ['image1.jpg'],
-        category_id: 'cat-123',
-        sku: 'NEW-001'
+        images: ["image1.jpg"],
+        category_id: "cat-123",
+        sku: "NEW-001",
       };
       service.createProduct.mockResolvedValue(mockProductDetails);
 
@@ -218,26 +240,32 @@ describe('ProductManagementController', () => {
     });
   });
 
-  describe('updateProduct', () => {
-    it('should update a product', async () => {
-      const productId = '123e4567-e89b-12d3-a456-426614174000';
+  describe("updateProduct", () => {
+    it("should update a product", async () => {
+      const productId = "123e4567-e89b-12d3-a456-426614174000";
       const updateProductDto: AdminUpdateProductDto = {
-        name: 'Updated Product',
-        price: 299.99
+        name: "Updated Product",
+        price: 299.99,
       };
       const updatedProduct = { ...mockProductDetails, ...updateProductDto };
       service.updateProduct.mockResolvedValue(updatedProduct);
 
-      const result = await controller.updateProduct(productId, updateProductDto);
+      const result = await controller.updateProduct(
+        productId,
+        updateProductDto,
+      );
 
       expect(result).toEqual(updatedProduct);
-      expect(service.updateProduct).toHaveBeenCalledWith(productId, updateProductDto);
+      expect(service.updateProduct).toHaveBeenCalledWith(
+        productId,
+        updateProductDto,
+      );
     });
   });
 
-  describe('deleteProduct', () => {
-    it('should delete a product', async () => {
-      const productId = '123e4567-e89b-12d3-a456-426614174000';
+  describe("deleteProduct", () => {
+    it("should delete a product", async () => {
+      const productId = "123e4567-e89b-12d3-a456-426614174000";
       service.deleteProduct.mockResolvedValue();
 
       await controller.deleteProduct(productId);
@@ -246,49 +274,55 @@ describe('ProductManagementController', () => {
     });
   });
 
-  describe('updateInventory', () => {
-    it('should update product inventory', async () => {
-      const productId = '123e4567-e89b-12d3-a456-426614174000';
+  describe("updateInventory", () => {
+    it("should update product inventory", async () => {
+      const productId = "123e4567-e89b-12d3-a456-426614174000";
       const updateInventoryDto: UpdateInventoryDto = {
         stock: 50,
-        minimum_stock: 10
+        minimum_stock: 10,
       };
       service.updateInventory.mockResolvedValue();
 
-      const result = await controller.updateInventory(productId, updateInventoryDto);
+      const result = await controller.updateInventory(
+        productId,
+        updateInventoryDto,
+      );
 
-      expect(result).toEqual({ message: 'Inventory updated successfully' });
-      expect(service.updateInventory).toHaveBeenCalledWith(productId, updateInventoryDto);
+      expect(result).toEqual({ message: "Inventory updated successfully" });
+      expect(service.updateInventory).toHaveBeenCalledWith(
+        productId,
+        updateInventoryDto,
+      );
     });
   });
 
-  describe('bulkAction', () => {
-    it('should perform bulk action on products', async () => {
+  describe("bulkAction", () => {
+    it("should perform bulk action on products", async () => {
       const bulkActionDto: BulkProductActionDto = {
-        product_ids: ['id1', 'id2'],
-        action: 'activate'
+        product_ids: ["id1", "id2"],
+        action: "activate",
       };
       service.bulkAction.mockResolvedValue();
 
       const result = await controller.bulkAction(bulkActionDto);
 
-      expect(result).toEqual({ message: 'Bulk action completed successfully' });
+      expect(result).toEqual({ message: "Bulk action completed successfully" });
       expect(service.bulkAction).toHaveBeenCalledWith(bulkActionDto);
     });
   });
 
-  describe('exportProducts', () => {
-    it('should export products', async () => {
+  describe("exportProducts", () => {
+    it("should export products", async () => {
       const exportDto: ExportProductsDto = {
-        format: 'csv',
-        status: ProductStatus.ACTIVE
+        format: "csv",
+        status: ProductStatus.ACTIVE,
       };
       const exportResult = {
-        export_id: 'export_123',
-        status: 'processing' as const,
+        export_id: "export_123",
+        status: "processing" as const,
         total_records: 100,
         created_at: new Date(),
-        expires_at: new Date()
+        expires_at: new Date(),
       };
       service.exportProducts.mockResolvedValue(exportResult);
 

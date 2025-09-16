@@ -4,14 +4,14 @@ import {
   ExecutionContext,
   CallHandler,
   Logger,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { CacheService } from '../cache.service';
-import { CacheKeyGenerator } from '../cache-key-generator.service';
-import { CACHE_METADATA_KEY } from '../decorators/cache.decorator';
-import { CacheOptions } from '../interfaces/cache.interface';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { Observable, of } from "rxjs";
+import { tap } from "rxjs/operators";
+import { CacheService } from "../cache.service";
+import { CacheKeyGenerator } from "../cache-key-generator.service";
+import { CACHE_METADATA_KEY } from "../decorators/cache.decorator";
+import { CacheOptions } from "../interfaces/cache.interface";
 
 @Injectable()
 export class CacheInterceptor implements NestInterceptor {
@@ -97,14 +97,14 @@ export class CacheInterceptor implements NestInterceptor {
 
     // Extract method arguments (excluding request/response objects)
     args.forEach((arg, index) => {
-      if (arg && typeof arg === 'object' && !arg.url && !arg.status) {
+      if (arg && typeof arg === "object" && !arg.url && !arg.status) {
         // This is likely a DTO or data object, not request/response
-        if (arg.constructor && arg.constructor.name !== 'Object') {
+        if (arg.constructor && arg.constructor.name !== "Object") {
           params[`arg${index}`] = arg;
         } else {
           Object.assign(params, arg);
         }
-      } else if (typeof arg === 'string' || typeof arg === 'number') {
+      } else if (typeof arg === "string" || typeof arg === "number") {
         params[`arg${index}`] = arg;
       }
     });

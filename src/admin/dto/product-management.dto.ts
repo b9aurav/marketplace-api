@@ -1,114 +1,121 @@
-import { 
-  IsString, 
-  IsNumber, 
-  IsArray, 
-  IsUUID, 
-  IsOptional, 
-  IsEnum, 
-  IsBoolean, 
-  IsPositive, 
-  Min, 
+import {
+  IsString,
+  IsNumber,
+  IsArray,
+  IsUUID,
+  IsOptional,
+  IsEnum,
+  IsBoolean,
+  IsPositive,
+  Min,
   MinLength,
   IsDateString,
   ValidateNested,
-  IsObject
-} from 'class-validator';
-import { Type, Transform } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PaginationDto } from '../../common/dto/pagination.dto';
-import { ProductStatus } from '../../products/entities/product.entity';
+  IsObject,
+} from "class-validator";
+import { Type, Transform } from "class-transformer";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { PaginationDto } from "../../common/dto/pagination.dto";
+import { ProductStatus } from "../../products/entities/product.entity";
 
 // Query DTOs
 export class GetProductsQueryDto extends PaginationDto {
-  @ApiPropertyOptional({ description: 'Search by product name, SKU, or description' })
+  @ApiPropertyOptional({
+    description: "Search by product name, SKU, or description",
+  })
   @IsOptional()
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ description: 'Filter by category ID' })
+  @ApiPropertyOptional({ description: "Filter by category ID" })
   @IsOptional()
   @IsUUID()
   category_id?: string;
 
-  @ApiPropertyOptional({ enum: ProductStatus, description: 'Filter by product status' })
+  @ApiPropertyOptional({
+    enum: ProductStatus,
+    description: "Filter by product status",
+  })
   @IsOptional()
   @IsEnum(ProductStatus)
   status?: ProductStatus;
 
-  @ApiPropertyOptional({ description: 'Filter by featured products' })
+  @ApiPropertyOptional({ description: "Filter by featured products" })
   @IsOptional()
-  @Transform(({ value }) => value === 'true')
+  @Transform(({ value }) => value === "true")
   @IsBoolean()
   featured?: boolean;
 
-  @ApiPropertyOptional({ description: 'Filter by minimum price' })
+  @ApiPropertyOptional({ description: "Filter by minimum price" })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
   min_price?: number;
 
-  @ApiPropertyOptional({ description: 'Filter by maximum price' })
+  @ApiPropertyOptional({ description: "Filter by maximum price" })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
   max_price?: number;
 
-  @ApiPropertyOptional({ description: 'Filter by minimum stock' })
+  @ApiPropertyOptional({ description: "Filter by minimum stock" })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
   min_stock?: number;
 
-  @ApiPropertyOptional({ description: 'Filter by maximum stock' })
+  @ApiPropertyOptional({ description: "Filter by maximum stock" })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
   max_stock?: number;
 
-  @ApiPropertyOptional({ description: 'Filter products created from this date' })
+  @ApiPropertyOptional({
+    description: "Filter products created from this date",
+  })
   @IsOptional()
   @IsDateString()
   date_from?: string;
 
-  @ApiPropertyOptional({ description: 'Filter products created to this date' })
+  @ApiPropertyOptional({ description: "Filter products created to this date" })
   @IsOptional()
   @IsDateString()
   date_to?: string;
 
-  @ApiPropertyOptional({ 
-    enum: ['name', 'price', 'stock', 'created_at', 'sales_count', 'rating'],
-    description: 'Sort by field' 
+  @ApiPropertyOptional({
+    enum: ["name", "price", "stock", "created_at", "sales_count", "rating"],
+    description: "Sort by field",
   })
   @IsOptional()
-  @IsEnum(['name', 'price', 'stock', 'created_at', 'sales_count', 'rating'])
-  sort_by?: string = 'created_at';
+  @IsEnum(["name", "price", "stock", "created_at", "sales_count", "rating"])
+  sort_by?: string = "created_at";
 
-  @ApiPropertyOptional({ 
-    enum: ['asc', 'desc'],
-    description: 'Sort order' 
+  @ApiPropertyOptional({
+    enum: ["asc", "desc"],
+    description: "Sort order",
   })
   @IsOptional()
-  @IsEnum(['asc', 'desc'])
-  sort_order?: string = 'desc';
+  @IsEnum(["asc", "desc"])
+  sort_order?: string = "desc";
 }
 
 // Product dimensions DTO
 export class ProductDimensionsDto {
-  @ApiProperty({ description: 'Length in cm' })
+  @ApiProperty({ description: "Length in cm" })
   @IsNumber()
   @IsPositive()
   length: number;
 
-  @ApiProperty({ description: 'Width in cm' })
+  @ApiProperty({ description: "Width in cm" })
   @IsNumber()
   @IsPositive()
   width: number;
 
-  @ApiProperty({ description: 'Height in cm' })
+  @ApiProperty({ description: "Height in cm" })
   @IsNumber()
   @IsPositive()
   height: number;
@@ -116,78 +123,81 @@ export class ProductDimensionsDto {
 
 // Create product DTO for admin
 export class AdminCreateProductDto {
-  @ApiProperty({ description: 'Product name' })
+  @ApiProperty({ description: "Product name" })
   @IsString()
   @MinLength(3)
   name: string;
 
-  @ApiProperty({ description: 'Product description' })
+  @ApiProperty({ description: "Product description" })
   @IsString()
   @MinLength(10)
   description: string;
 
-  @ApiProperty({ description: 'Product price' })
+  @ApiProperty({ description: "Product price" })
   @IsNumber()
   @IsPositive()
   price: number;
 
-  @ApiProperty({ description: 'Stock quantity' })
+  @ApiProperty({ description: "Stock quantity" })
   @IsNumber()
   @Min(0)
   stock: number;
 
-  @ApiProperty({ description: 'Product images URLs', type: [String] })
+  @ApiProperty({ description: "Product images URLs", type: [String] })
   @IsArray()
   @IsString({ each: true })
   images: string[];
 
-  @ApiProperty({ description: 'Category ID' })
+  @ApiProperty({ description: "Category ID" })
   @IsUUID()
   category_id: string;
 
-  @ApiProperty({ description: 'Product SKU' })
+  @ApiProperty({ description: "Product SKU" })
   @IsString()
   sku: string;
 
-  @ApiPropertyOptional({ description: 'Product weight in kg' })
+  @ApiPropertyOptional({ description: "Product weight in kg" })
   @IsOptional()
   @IsNumber()
   @IsPositive()
   weight?: number;
 
-  @ApiPropertyOptional({ description: 'Product dimensions', type: ProductDimensionsDto })
+  @ApiPropertyOptional({
+    description: "Product dimensions",
+    type: ProductDimensionsDto,
+  })
   @IsOptional()
   @ValidateNested()
   @Type(() => ProductDimensionsDto)
   dimensions?: ProductDimensionsDto;
 
-  @ApiPropertyOptional({ enum: ProductStatus, description: 'Product status' })
+  @ApiPropertyOptional({ enum: ProductStatus, description: "Product status" })
   @IsOptional()
   @IsEnum(ProductStatus)
   status?: ProductStatus = ProductStatus.ACTIVE;
 
-  @ApiPropertyOptional({ description: 'Is product featured' })
+  @ApiPropertyOptional({ description: "Is product featured" })
   @IsOptional()
   @IsBoolean()
   featured?: boolean = false;
 
-  @ApiPropertyOptional({ description: 'Product tags', type: [String] })
+  @ApiPropertyOptional({ description: "Product tags", type: [String] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   tags?: string[] = [];
 
-  @ApiPropertyOptional({ description: 'SEO meta title' })
+  @ApiPropertyOptional({ description: "SEO meta title" })
   @IsOptional()
   @IsString()
   meta_title?: string;
 
-  @ApiPropertyOptional({ description: 'SEO meta description' })
+  @ApiPropertyOptional({ description: "SEO meta description" })
   @IsOptional()
   @IsString()
   meta_description?: string;
 
-  @ApiPropertyOptional({ description: 'Minimum stock threshold' })
+  @ApiPropertyOptional({ description: "Minimum stock threshold" })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -196,85 +206,88 @@ export class AdminCreateProductDto {
 
 // Update product DTO for admin
 export class AdminUpdateProductDto {
-  @ApiPropertyOptional({ description: 'Product name' })
+  @ApiPropertyOptional({ description: "Product name" })
   @IsOptional()
   @IsString()
   @MinLength(3)
   name?: string;
 
-  @ApiPropertyOptional({ description: 'Product description' })
+  @ApiPropertyOptional({ description: "Product description" })
   @IsOptional()
   @IsString()
   @MinLength(10)
   description?: string;
 
-  @ApiPropertyOptional({ description: 'Product price' })
+  @ApiPropertyOptional({ description: "Product price" })
   @IsOptional()
   @IsNumber()
   @IsPositive()
   price?: number;
 
-  @ApiPropertyOptional({ description: 'Stock quantity' })
+  @ApiPropertyOptional({ description: "Stock quantity" })
   @IsOptional()
   @IsNumber()
   @Min(0)
   stock?: number;
 
-  @ApiPropertyOptional({ description: 'Product images URLs', type: [String] })
+  @ApiPropertyOptional({ description: "Product images URLs", type: [String] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   images?: string[];
 
-  @ApiPropertyOptional({ description: 'Category ID' })
+  @ApiPropertyOptional({ description: "Category ID" })
   @IsOptional()
   @IsUUID()
   category_id?: string;
 
-  @ApiPropertyOptional({ description: 'Product SKU' })
+  @ApiPropertyOptional({ description: "Product SKU" })
   @IsOptional()
   @IsString()
   sku?: string;
 
-  @ApiPropertyOptional({ description: 'Product weight in kg' })
+  @ApiPropertyOptional({ description: "Product weight in kg" })
   @IsOptional()
   @IsNumber()
   @IsPositive()
   weight?: number;
 
-  @ApiPropertyOptional({ description: 'Product dimensions', type: ProductDimensionsDto })
+  @ApiPropertyOptional({
+    description: "Product dimensions",
+    type: ProductDimensionsDto,
+  })
   @IsOptional()
   @ValidateNested()
   @Type(() => ProductDimensionsDto)
   dimensions?: ProductDimensionsDto;
 
-  @ApiPropertyOptional({ enum: ProductStatus, description: 'Product status' })
+  @ApiPropertyOptional({ enum: ProductStatus, description: "Product status" })
   @IsOptional()
   @IsEnum(ProductStatus)
   status?: ProductStatus;
 
-  @ApiPropertyOptional({ description: 'Is product featured' })
+  @ApiPropertyOptional({ description: "Is product featured" })
   @IsOptional()
   @IsBoolean()
   featured?: boolean;
 
-  @ApiPropertyOptional({ description: 'Product tags', type: [String] })
+  @ApiPropertyOptional({ description: "Product tags", type: [String] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   tags?: string[];
 
-  @ApiPropertyOptional({ description: 'SEO meta title' })
+  @ApiPropertyOptional({ description: "SEO meta title" })
   @IsOptional()
   @IsString()
   meta_title?: string;
 
-  @ApiPropertyOptional({ description: 'SEO meta description' })
+  @ApiPropertyOptional({ description: "SEO meta description" })
   @IsOptional()
   @IsString()
   meta_description?: string;
 
-  @ApiPropertyOptional({ description: 'Minimum stock threshold' })
+  @ApiPropertyOptional({ description: "Minimum stock threshold" })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -283,18 +296,18 @@ export class AdminUpdateProductDto {
 
 // Update inventory DTO
 export class UpdateInventoryDto {
-  @ApiProperty({ description: 'New stock quantity' })
+  @ApiProperty({ description: "New stock quantity" })
   @IsNumber()
   @Min(0)
   stock: number;
 
-  @ApiPropertyOptional({ description: 'Minimum stock threshold' })
+  @ApiPropertyOptional({ description: "Minimum stock threshold" })
   @IsOptional()
   @IsNumber()
   @Min(0)
   minimum_stock?: number;
 
-  @ApiPropertyOptional({ description: 'Reason for inventory update' })
+  @ApiPropertyOptional({ description: "Reason for inventory update" })
   @IsOptional()
   @IsString()
   reason?: string;
@@ -302,19 +315,22 @@ export class UpdateInventoryDto {
 
 // Bulk action DTO
 export class BulkProductActionDto {
-  @ApiProperty({ description: 'Product IDs to perform action on', type: [String] })
+  @ApiProperty({
+    description: "Product IDs to perform action on",
+    type: [String],
+  })
   @IsArray()
   @IsUUID(undefined, { each: true })
   product_ids: string[];
 
-  @ApiProperty({ 
-    enum: ['activate', 'deactivate', 'delete', 'feature', 'unfeature'],
-    description: 'Action to perform' 
+  @ApiProperty({
+    enum: ["activate", "deactivate", "delete", "feature", "unfeature"],
+    description: "Action to perform",
   })
-  @IsEnum(['activate', 'deactivate', 'delete', 'feature', 'unfeature'])
+  @IsEnum(["activate", "deactivate", "delete", "feature", "unfeature"])
   action: string;
 
-  @ApiPropertyOptional({ description: 'Additional data for the action' })
+  @ApiPropertyOptional({ description: "Additional data for the action" })
   @IsOptional()
   @IsObject()
   data?: Record<string, any>;
@@ -322,42 +338,47 @@ export class BulkProductActionDto {
 
 // Export DTO
 export class ExportProductsDto {
-  @ApiPropertyOptional({ 
-    enum: ['csv', 'xlsx'],
-    description: 'Export format' 
+  @ApiPropertyOptional({
+    enum: ["csv", "xlsx"],
+    description: "Export format",
   })
   @IsOptional()
-  @IsEnum(['csv', 'xlsx'])
-  format?: string = 'csv';
+  @IsEnum(["csv", "xlsx"])
+  format?: string = "csv";
 
-  @ApiPropertyOptional({ description: 'Filter by category ID' })
+  @ApiPropertyOptional({ description: "Filter by category ID" })
   @IsOptional()
   @IsUUID()
   category_id?: string;
 
-  @ApiPropertyOptional({ enum: ProductStatus, description: 'Filter by product status' })
+  @ApiPropertyOptional({
+    enum: ProductStatus,
+    description: "Filter by product status",
+  })
   @IsOptional()
   @IsEnum(ProductStatus)
   status?: ProductStatus;
 
-  @ApiPropertyOptional({ description: 'Filter by featured products' })
+  @ApiPropertyOptional({ description: "Filter by featured products" })
   @IsOptional()
   @IsBoolean()
   featured?: boolean;
 
-  @ApiPropertyOptional({ description: 'Filter products created from this date' })
+  @ApiPropertyOptional({
+    description: "Filter products created from this date",
+  })
   @IsOptional()
   @IsDateString()
   date_from?: string;
 
-  @ApiPropertyOptional({ description: 'Filter products created to this date' })
+  @ApiPropertyOptional({ description: "Filter products created to this date" })
   @IsOptional()
   @IsDateString()
   date_to?: string;
 
-  @ApiPropertyOptional({ 
-    description: 'Fields to include in export',
-    type: [String]
+  @ApiPropertyOptional({
+    description: "Fields to include in export",
+    type: [String],
   })
   @IsOptional()
   @IsArray()
@@ -503,7 +524,7 @@ export class ExportResultDto {
   export_id: string;
 
   @ApiProperty()
-  status: 'processing' | 'completed' | 'failed';
+  status: "processing" | "completed" | "failed";
 
   @ApiProperty()
   download_url?: string;

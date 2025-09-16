@@ -1,18 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { OrdersService } from './orders.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Order, OrderStatus } from './entities/order.entity';
-import { OrderItem } from './entities/order-item.entity';
-import { Product } from '../products/entities/product.entity';
-import { DataSource } from 'typeorm';
-import { NotFoundException } from '@nestjs/common';
+import { Test, TestingModule } from "@nestjs/testing";
+import { OrdersService } from "./orders.service";
+import { getRepositoryToken } from "@nestjs/typeorm";
+import { Order, OrderStatus } from "./entities/order.entity";
+import { OrderItem } from "./entities/order-item.entity";
+import { Product } from "../products/entities/product.entity";
+import { DataSource } from "typeorm";
 
-describe('OrdersService', () => {
+describe("OrdersService", () => {
   let service: OrdersService;
-  let ordersRepository: any;
-  let orderItemsRepository: any;
-  let productsRepository: any;
-  let dataSource: any;
 
   const mockOrdersRepository = {
     findAndCount: jest.fn(),
@@ -76,33 +71,29 @@ describe('OrdersService', () => {
     }).compile();
 
     service = module.get<OrdersService>(OrdersService);
-    ordersRepository = module.get(getRepositoryToken(Order));
-    orderItemsRepository = module.get(getRepositoryToken(OrderItem));
-    productsRepository = module.get(getRepositoryToken(Product));
-    dataSource = module.get(DataSource);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('getUserOrders', () => {
-    it('should return user orders without status filter', async () => {
+  describe("getUserOrders", () => {
+    it("should return user orders without status filter", async () => {
       const mockOrders = [
         {
-          id: '1',
-          user_id: 'user1',
-          address_id: 'addr1',
+          id: "1",
+          user_id: "user1",
+          address_id: "addr1",
           items: [],
           address: {},
           status: OrderStatus.PENDING,
           total: 100,
           tracking_number: null,
-          payment_method: 'credit_card',
-          transaction_id: 'txn1',
+          payment_method: "credit_card",
+          transaction_id: "txn1",
           created_at: new Date(),
           updated_at: new Date(),
-          user: { id: 'user1' },
+          user: { id: "user1" },
           order_items: [],
           coupon_code: null,
           discount_amount: 0,
@@ -112,67 +103,70 @@ describe('OrdersService', () => {
 
       mockOrdersRepository.findAndCount.mockResolvedValue([mockOrders, 1]);
 
-      const result = await service.getUserOrders('user1');
+      const result = await service.getUserOrders("user1");
 
       expect(result).toEqual({
         orders: mockOrders,
         total: 1,
       });
       expect(mockOrdersRepository.findAndCount).toHaveBeenCalledWith({
-        where: { user: { id: 'user1' } },
-        relations: ['items', 'items.product'],
-        order: { created_at: 'DESC' },
+        where: { user: { id: "user1" } },
+        relations: ["items", "items.product"],
+        order: { created_at: "DESC" },
       });
     });
 
-    it('should return filtered user orders with status', async () => {
+    it("should return filtered user orders with status", async () => {
       const mockOrders = [
         {
-          id: '1',
+          id: "1",
           created_at: new Date(),
           total: 100,
           status: OrderStatus.PENDING,
-          user: { id: 'user1', email: 'test@example.com', name: 'Test User' },
+          user: { id: "user1", email: "test@example.com", name: "Test User" },
           items: [],
           address: {},
-          tracking_number: 'TRACK123',
-          payment_method: 'credit_card',
-          transaction_id: 'TRANS123',
+          tracking_number: "TRACK123",
+          payment_method: "credit_card",
+          transaction_id: "TRANS123",
         },
       ];
 
-      mockOrdersRepository.findAndCount.mockResolvedValue([mockOrders, mockOrders.length]);
+      mockOrdersRepository.findAndCount.mockResolvedValue([
+        mockOrders,
+        mockOrders.length,
+      ]);
 
-      const result = await service.getUserOrders('user1');
+      const result = await service.getUserOrders("user1");
 
       expect(result).toEqual({
         orders: mockOrders,
         total: mockOrders.length,
       });
       expect(mockOrdersRepository.findAndCount).toHaveBeenCalledWith({
-        where: { user: { id: 'user1' } },
-        relations: ['items', 'items.product'],
-        order: { created_at: 'DESC' },
+        where: { user: { id: "user1" } },
+        relations: ["items", "items.product"],
+        order: { created_at: "DESC" },
       });
     });
   });
 
-  describe('getOrderDetails', () => {
-    it('should return order details when found', async () => {
+  describe("getOrderDetails", () => {
+    it("should return order details when found", async () => {
       const mockOrder = {
-        id: '1',
-        user_id: 'user1',
-        address_id: 'addr1',
+        id: "1",
+        user_id: "user1",
+        address_id: "addr1",
         items: [],
         address: {},
         status: OrderStatus.PENDING,
         total: 100,
         tracking_number: null,
-        payment_method: 'credit_card',
-        transaction_id: 'txn1',
+        payment_method: "credit_card",
+        transaction_id: "txn1",
         created_at: new Date(),
         updated_at: new Date(),
-        user: { id: 'user1' },
+        user: { id: "user1" },
         order_items: [],
         coupon_code: null,
         discount_amount: 0,
@@ -181,84 +175,90 @@ describe('OrdersService', () => {
 
       mockOrdersRepository.findOne.mockResolvedValue(mockOrder);
 
-      const result = await service.getOrderDetails('user1', '1');
+      const result = await service.getOrderDetails("user1", "1");
 
       expect(result).toEqual({ order: mockOrder });
       expect(mockOrdersRepository.findOne).toHaveBeenCalledWith({
-        where: { id: '1', user: { id: 'user1' } },
-        relations: ['items', 'items.product'],
+        where: { id: "1", user: { id: "user1" } },
+        relations: ["items", "items.product"],
       });
     });
 
-    it('should throw NotFoundException when order not found', async () => {
+    it("should throw NotFoundException when order not found", async () => {
       mockOrdersRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.getOrderDetails('user1', '1')).rejects.toThrow('Order not found');
+      await expect(service.getOrderDetails("user1", "1")).rejects.toThrow(
+        "Order not found",
+      );
     });
   });
 
-  describe('cancelOrder', () => {
-    it('should cancel order when in valid status', async () => {
+  describe("cancelOrder", () => {
+    it("should cancel order when in valid status", async () => {
       const mockOrder = {
-        id: '1',
+        id: "1",
         status: OrderStatus.PENDING,
         save: jest.fn(),
       };
 
       mockOrdersRepository.findOne.mockResolvedValue(mockOrder);
 
-      const result = await service.cancelOrder('user1', '1');
+      const result = await service.cancelOrder("user1", "1");
 
-      expect(result).toEqual({ message: 'Order cancelled successfully' });
+      expect(result).toEqual({ message: "Order cancelled successfully" });
       expect(mockOrder.status).toBe(OrderStatus.CANCELLED);
       expect(mockOrdersRepository.save).toHaveBeenCalledWith(mockOrder);
     });
 
-    it('should throw NotFoundException when order not found', async () => {
+    it("should throw NotFoundException when order not found", async () => {
       mockOrdersRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.cancelOrder('user1', '1')).rejects.toThrow('Order not found');
+      await expect(service.cancelOrder("user1", "1")).rejects.toThrow(
+        "Order not found",
+      );
     });
 
-    it('should throw error when order cannot be cancelled', async () => {
+    it("should throw error when order cannot be cancelled", async () => {
       const mockOrder = {
-        id: '1',
+        id: "1",
         status: OrderStatus.SHIPPED,
       };
 
       mockOrdersRepository.findOne.mockResolvedValue(mockOrder);
 
-      await expect(service.cancelOrder('user1', '1')).rejects.toThrow('Only pending orders can be cancelled');
+      await expect(service.cancelOrder("user1", "1")).rejects.toThrow(
+        "Only pending orders can be cancelled",
+      );
     });
   });
 
-  describe('trackOrder', () => {
-    it('should return tracking information when order found', async () => {
+  describe("trackOrder", () => {
+    it("should return tracking information when order found", async () => {
       const mockOrder = {
-        id: '1',
-        user_id: 'user1',
-        address_id: 'addr1',
+        id: "1",
+        user_id: "user1",
+        address_id: "addr1",
         items: [],
         address: {},
         status: OrderStatus.SHIPPED,
         total: 100,
-        tracking_number: 'TRACK123',
-        payment_method: 'credit_card',
-        transaction_id: 'txn1',
+        tracking_number: "TRACK123",
+        payment_method: "credit_card",
+        transaction_id: "txn1",
         created_at: new Date(),
         updated_at: new Date(),
-        user: { id: 'user1' },
+        user: { id: "user1" },
         order_items: [],
         coupon_code: null,
         discount_amount: 0,
         tracking_info: {
-          location: 'Warehouse A',
-          estimated_delivery: new Date('2025-06-12T08:02:55.112Z'),
+          location: "Warehouse A",
+          estimated_delivery: new Date("2025-06-12T08:02:55.112Z"),
           updates: [
             {
               timestamp: new Date(),
-              status: 'In Transit',
-              location: 'Warehouse A',
+              status: "In Transit",
+              location: "Warehouse A",
             },
           ],
         },
@@ -266,38 +266,40 @@ describe('OrdersService', () => {
 
       mockOrdersRepository.findOne.mockResolvedValue(mockOrder);
 
-      const result = await service.trackOrder('user1', '1');
+      const result = await service.trackOrder("user1", "1");
 
       expect(result).toEqual({ order: mockOrder });
       expect(mockOrdersRepository.findOne).toHaveBeenCalledWith({
-        where: { id: '1', user: { id: 'user1' } },
+        where: { id: "1", user: { id: "user1" } },
       });
     });
 
-    it('should throw NotFoundException when order not found', async () => {
+    it("should throw NotFoundException when order not found", async () => {
       mockOrdersRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.trackOrder('user1', '1')).rejects.toThrow('Order not found');
+      await expect(service.trackOrder("user1", "1")).rejects.toThrow(
+        "Order not found",
+      );
     });
   });
 
-  describe('getAllOrders', () => {
-    it('should return all orders without filters', async () => {
+  describe("getAllOrders", () => {
+    it("should return all orders without filters", async () => {
       const mockOrders = [
         {
-          id: '1',
-          user_id: 'user1',
-          address_id: 'addr1',
+          id: "1",
+          user_id: "user1",
+          address_id: "addr1",
           items: [],
           address: {},
           status: OrderStatus.PENDING,
           total: 100,
           tracking_number: null,
-          payment_method: 'credit_card',
-          transaction_id: 'txn1',
+          payment_method: "credit_card",
+          transaction_id: "txn1",
           created_at: new Date(),
           updated_at: new Date(),
-          user: { id: 'user1', email: 'user1@example.com', name: 'User 1' },
+          user: { id: "user1", email: "user1@example.com", name: "User 1" },
           order_items: [],
           coupon_code: null,
           discount_amount: 0,
@@ -318,7 +320,7 @@ describe('OrdersService', () => {
       const result = await service.getAllOrders();
 
       expect(result).toEqual({
-        orders: mockOrders.map(order => ({
+        orders: mockOrders.map((order) => ({
           id: order.id,
           date: order.created_at,
           total: order.total,
@@ -328,7 +330,7 @@ describe('OrdersService', () => {
             email: order.user.email,
             name: order.user.name,
           },
-          items: order.items.map(item => ({
+          items: order.items.map((item) => ({
             id: item.id,
             quantity: item.quantity,
             price: item.price,
@@ -346,22 +348,22 @@ describe('OrdersService', () => {
       });
     });
 
-    it('should return filtered orders with user_id and status', async () => {
+    it("should return filtered orders with user_id and status", async () => {
       const mockOrders = [
         {
-          id: '1',
-          user_id: 'user1',
-          address_id: 'addr1',
+          id: "1",
+          user_id: "user1",
+          address_id: "addr1",
           items: [],
           address: {},
           status: OrderStatus.PENDING,
           total: 100,
           tracking_number: null,
-          payment_method: 'credit_card',
-          transaction_id: 'txn1',
+          payment_method: "credit_card",
+          transaction_id: "txn1",
           created_at: new Date(),
           updated_at: new Date(),
-          user: { id: 'user1', email: 'user1@example.com', name: 'User 1' },
+          user: { id: "user1", email: "user1@example.com", name: "User 1" },
           order_items: [],
           coupon_code: null,
           discount_amount: 0,
@@ -379,10 +381,10 @@ describe('OrdersService', () => {
 
       mockOrdersRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
-      const result = await service.getAllOrders('user1', OrderStatus.PENDING);
+      const result = await service.getAllOrders("user1", OrderStatus.PENDING);
 
       expect(result).toEqual({
-        orders: mockOrders.map(order => ({
+        orders: mockOrders.map((order) => ({
           id: order.id,
           date: order.created_at,
           total: order.total,
@@ -392,7 +394,7 @@ describe('OrdersService', () => {
             email: order.user.email,
             name: order.user.name,
           },
-          items: order.items.map(item => ({
+          items: order.items.map((item) => ({
             id: item.id,
             quantity: item.quantity,
             price: item.price,
@@ -409,27 +411,35 @@ describe('OrdersService', () => {
         })),
       });
 
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('order.user_id = :userId', { userId: 'user1' });
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('order.status = :status', { status: OrderStatus.PENDING });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        "order.user_id = :userId",
+        { userId: "user1" },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        "order.status = :status",
+        { status: OrderStatus.PENDING },
+      );
     });
   });
 
-  describe('updateOrderStatus', () => {
-    it('should update order status successfully', async () => {
+  describe("updateOrderStatus", () => {
+    it("should update order status successfully", async () => {
       const mockOrder = {
-        id: '1',
+        id: "1",
         status: OrderStatus.PENDING,
         save: jest.fn(),
       };
 
       mockOrdersRepository.findOne.mockResolvedValue(mockOrder);
 
-      const result = await service.updateOrderStatus('1', { status: OrderStatus.SHIPPED });
+      const result = await service.updateOrderStatus("1", {
+        status: OrderStatus.SHIPPED,
+      });
 
       expect(result).toEqual({
-        message: 'Order status updated successfully',
+        message: "Order status updated successfully",
         order: {
-          id: '1',
+          id: "1",
           status: OrderStatus.SHIPPED,
         },
       });
@@ -437,10 +447,12 @@ describe('OrdersService', () => {
       expect(mockOrdersRepository.save).toHaveBeenCalledWith(mockOrder);
     });
 
-    it('should throw NotFoundException when order not found', async () => {
+    it("should throw NotFoundException when order not found", async () => {
       mockOrdersRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.updateOrderStatus('1', { status: OrderStatus.SHIPPED })).rejects.toThrow('Order not found');
+      await expect(
+        service.updateOrderStatus("1", { status: OrderStatus.SHIPPED }),
+      ).rejects.toThrow("Order not found");
     });
   });
-}); 
+});

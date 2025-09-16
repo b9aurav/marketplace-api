@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, Like } from 'typeorm';
-import { User } from '../users/entities/user.entity';
-import { Order, OrderStatus } from '../orders/entities/order.entity';
-import { Product } from '../products/entities/product.entity';
-import { Role } from '../common/decorators/roles.decorator';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { User } from "../users/entities/user.entity";
+import { Order, OrderStatus } from "../orders/entities/order.entity";
+import { Product } from "../products/entities/product.entity";
+import { Role } from "../common/decorators/roles.decorator";
 
 @Injectable()
 export class AdminService {
@@ -20,18 +20,23 @@ export class AdminService {
   async getDashboardSummary() {
     // Get total sales (sum of all paid orders)
     const totalSales = await this.ordersRepository
-      .createQueryBuilder('order')
-      .select('SUM(order.total)', 'total')
-      .where('order.status IN (:...statuses)', {
-        statuses: [OrderStatus.PAID, OrderStatus.PROCESSING, OrderStatus.SHIPPED, OrderStatus.DELIVERED],
+      .createQueryBuilder("order")
+      .select("SUM(order.total)", "total")
+      .where("order.status IN (:...statuses)", {
+        statuses: [
+          OrderStatus.PAID,
+          OrderStatus.PROCESSING,
+          OrderStatus.SHIPPED,
+          OrderStatus.DELIVERED,
+        ],
       })
       .getRawOne();
 
     // Get active users (users who have placed at least one order)
     const activeUsers = await this.usersRepository
-      .createQueryBuilder('user')
-      .innerJoin('user.orders', 'order')
-      .select('COUNT(DISTINCT user.id)', 'count')
+      .createQueryBuilder("user")
+      .innerJoin("user.orders", "order")
+      .select("COUNT(DISTINCT user.id)", "count")
       .getRawOne();
 
     // Get pending orders
@@ -52,14 +57,14 @@ export class AdminService {
 
   async getSalesAnalytics(range?: string) {
     const endDate = new Date();
-    let startDate = new Date();
+    const startDate = new Date();
 
     // Set date range based on the range parameter
     switch (range) {
-      case 'last_30_days':
+      case "last_30_days":
         startDate.setDate(startDate.getDate() - 30);
         break;
-      case 'last_90_days':
+      case "last_90_days":
         startDate.setDate(startDate.getDate() - 90);
         break;
       default: // last_7_days
@@ -68,46 +73,52 @@ export class AdminService {
 
     // Get daily sales data
     const salesData = await this.ordersRepository
-      .createQueryBuilder('order')
-      .select('DATE(order.created_at)', 'date')
-      .addSelect('SUM(order.total)', 'revenue')
-      .where('order.created_at BETWEEN :startDate AND :endDate', {
+      .createQueryBuilder("order")
+      .select("DATE(order.created_at)", "date")
+      .addSelect("SUM(order.total)", "revenue")
+      .where("order.created_at BETWEEN :startDate AND :endDate", {
         startDate,
         endDate,
       })
-      .andWhere('order.status IN (:...statuses)', {
-        statuses: [OrderStatus.PAID, OrderStatus.PROCESSING, OrderStatus.SHIPPED, OrderStatus.DELIVERED],
+      .andWhere("order.status IN (:...statuses)", {
+        statuses: [
+          OrderStatus.PAID,
+          OrderStatus.PROCESSING,
+          OrderStatus.SHIPPED,
+          OrderStatus.DELIVERED,
+        ],
       })
-      .groupBy('DATE(order.created_at)')
-      .orderBy('date', 'ASC')
+      .groupBy("DATE(order.created_at)")
+      .orderBy("date", "ASC")
       .getRawMany();
 
     // Format the data
-    const dates = salesData.map(data => data.date);
-    const revenue = salesData.map(data => parseFloat(data.revenue));
+    const dates = salesData.map((data) => data.date);
+    const revenue = salesData.map((data) => parseFloat(data.revenue));
 
     return {
       dates,
       revenue,
-      range: range || 'last_7_days',
+      range: range || "last_7_days",
     };
   }
 
   async getUsers(search?: string) {
-    const query = this.usersRepository.createQueryBuilder('user')
-      .leftJoinAndSelect('user.orders', 'order')
+    const query = this.usersRepository
+      .createQueryBuilder("user")
+      .leftJoinAndSelect("user.orders", "order")
       .select([
-        'user.id',
-        'user.name',
-        'user.email',
-        'user.created_at',
-        'user.role',
-        'COUNT(DISTINCT order.id) as order_count',
+        "user.id",
+        "user.name",
+        "user.email",
+        "user.created_at",
+        "user.role",
+        "COUNT(DISTINCT order.id) as order_count",
       ])
-      .groupBy('user.id');
+      .groupBy("user.id");
 
     if (search) {
-      query.where('user.name ILIKE :search OR user.email ILIKE :search', {
+      query.where("user.name ILIKE :search OR user.email ILIKE :search", {
         search: `%${search}%`,
       });
     }
@@ -115,13 +126,13 @@ export class AdminService {
     const [users, total] = await query.getManyAndCount();
 
     return {
-      users: users.map(user => ({
+      users: users.map((user) => ({
         id: user.id,
         name: user.name,
         email: user.email,
         created_at: user.created_at,
         role: user.role,
-        order_count: user['order_count'],
+        order_count: user["order_count"],
       })),
       total,
     };
@@ -133,7 +144,7 @@ export class AdminService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException("User not found");
     }
 
     // Update user role to USER (effectively blocking admin access)
@@ -141,7 +152,7 @@ export class AdminService {
     await this.usersRepository.save(user);
 
     return {
-      message: 'User blocked successfully',
+      message: "User blocked successfully",
       user_id: userId,
     };
   }

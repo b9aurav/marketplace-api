@@ -1,27 +1,34 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { Product } from './product.entity';
-import { User } from '../../users/entities/user.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from "typeorm";
+import { Product } from "./product.entity";
+import { User } from "../../users/entities/user.entity";
 
-@Entity('reviews')
+@Entity("reviews")
 export class Review {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column('text')
+  @Column("text")
   content: string;
 
-  @Column('int')
+  @Column("int")
   rating: number;
 
-  @ManyToOne(() => Product, product => product.reviews)
-  @JoinColumn({ name: 'product_id' })
+  @ManyToOne(() => Product, (product) => product.reviews)
+  @JoinColumn({ name: "product_id" })
   product: Product;
 
   @Column()
   product_id: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: "user_id" })
   user: User;
 
   @Column()

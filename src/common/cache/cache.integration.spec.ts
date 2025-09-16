@@ -1,10 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigModule } from '@nestjs/config';
-import { CacheModule } from './cache.module';
-import { CacheService } from './cache.service';
-import { CacheKeyGenerator } from './cache-key-generator.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ConfigModule } from "@nestjs/config";
+import { CacheModule } from "./cache.module";
+import { CacheService } from "./cache.service";
+import { CacheKeyGenerator } from "./cache-key-generator.service";
 
-describe('Cache Integration', () => {
+describe("Cache Integration", () => {
   let module: TestingModule;
   let cacheService: CacheService;
   let keyGenerator: CacheKeyGenerator;
@@ -14,7 +14,7 @@ describe('Cache Integration', () => {
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
-          envFilePath: '.env.test', // Use test environment
+          envFilePath: ".env.test", // Use test environment
         }),
         CacheModule,
       ],
@@ -28,22 +28,22 @@ describe('Cache Integration', () => {
     await module.close();
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(cacheService).toBeDefined();
     expect(keyGenerator).toBeDefined();
   });
 
-  it('should generate consistent cache keys', () => {
-    const key1 = keyGenerator.generateKey('test', { a: 1, b: 2 });
-    const key2 = keyGenerator.generateKey('test', { b: 2, a: 1 });
-    
+  it("should generate consistent cache keys", () => {
+    const key1 = keyGenerator.generateKey("test", { a: 1, b: 2 });
+    const key2 = keyGenerator.generateKey("test", { b: 2, a: 1 });
+
     expect(key1).toBe(key2);
-    expect(key1).toBe('test:a=1:b=2');
+    expect(key1).toBe("test:a=1:b=2");
   });
 
-  it('should handle cache operations gracefully', async () => {
-    const key = 'test:integration';
-    const value = { test: 'data', timestamp: Date.now() };
+  it("should handle cache operations gracefully", async () => {
+    const key = "test:integration";
+    const value = { test: "data", timestamp: Date.now() };
 
     // Test set operation (should not throw even if Redis is not available)
     await expect(cacheService.set(key, value, 60)).resolves.not.toThrow();
@@ -57,20 +57,20 @@ describe('Cache Integration', () => {
     await expect(cacheService.del(key)).resolves.not.toThrow();
   });
 
-  it('should handle pattern operations gracefully', async () => {
+  it("should handle pattern operations gracefully", async () => {
     // Test pattern deletion (should not throw even if Redis is not available)
-    await expect(cacheService.delPattern('test:*')).resolves.not.toThrow();
+    await expect(cacheService.delPattern("test:*")).resolves.not.toThrow();
   });
 
-  it('should handle exists and ttl operations gracefully', async () => {
-    const key = 'test:exists';
+  it("should handle exists and ttl operations gracefully", async () => {
+    const key = "test:exists";
 
     // Test exists operation (should not throw)
     const exists = await cacheService.exists(key);
-    expect(typeof exists).toBe('boolean');
+    expect(typeof exists).toBe("boolean");
 
     // Test TTL operation (should not throw)
     const ttl = await cacheService.ttl(key);
-    expect(typeof ttl).toBe('number');
+    expect(typeof ttl).toBe("number");
   });
 });

@@ -4,11 +4,11 @@ import {
   ExecutionContext,
   CallHandler,
   Logger,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { CacheService } from '../cache.service';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { Observable } from "rxjs";
+import { tap } from "rxjs/operators";
+import { CacheService } from "../cache.service";
 
 @Injectable()
 export class CacheInvalidationInterceptor implements NestInterceptor {
@@ -21,7 +21,7 @@ export class CacheInvalidationInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const invalidationPatterns = this.reflector.get<string[]>(
-      'cache_invalidate',
+      "cache_invalidate",
       context.getHandler(),
     );
 
@@ -40,7 +40,7 @@ export class CacheInvalidationInterceptor implements NestInterceptor {
             }),
           );
         } catch (error) {
-          this.logger.error('Cache invalidation error:', error);
+          this.logger.error("Cache invalidation error:", error);
           // Don't throw error to avoid breaking the main operation
         }
       }),

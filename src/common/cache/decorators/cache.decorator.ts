@@ -1,7 +1,7 @@
-import { SetMetadata } from '@nestjs/common';
-import { CacheOptions } from '../interfaces/cache.interface';
+import { SetMetadata } from "@nestjs/common";
+import { CacheOptions } from "../interfaces/cache.interface";
 
-export const CACHE_METADATA_KEY = 'cache_options';
+export const CACHE_METADATA_KEY = "cache_options";
 
 /**
  * Cache decorator for method-level caching
@@ -17,5 +17,5 @@ export const Cache = (options: CacheOptions = {}) => {
  */
 export const CacheInvalidate = (patterns: string | string[]) => {
   const patternsArray = Array.isArray(patterns) ? patterns : [patterns];
-  return SetMetadata('cache_invalidate', patternsArray);
+  return SetMetadata("cache_invalidate", patternsArray);
 };

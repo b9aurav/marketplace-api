@@ -1,25 +1,25 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { CartModule } from '../src/cart/cart.module';
-import { JwtAuthGuard } from '../src/auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../src/common/guards/roles.guard';
-import { Role } from '../src/common/decorators/roles.decorator';
-import { User } from '../src/users/entities/user.entity';
-import { Cart } from '../src/cart/entities/cart.entity';
-import { CartItem } from '../src/cart/entities/cart-item.entity';
-import { Product } from '../src/products/entities/product.entity';
-import { Category } from '../src/products/entities/category.entity';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Review } from '../src/products/entities/review.entity';
+import { Test, TestingModule } from "@nestjs/testing";
+import { INestApplication } from "@nestjs/common";
+import * as request from "supertest";
+import { CartModule } from "../src/cart/cart.module";
+import { JwtAuthGuard } from "../src/auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../src/common/guards/roles.guard";
+import { Role } from "../src/common/decorators/roles.decorator";
+import { User } from "../src/users/entities/user.entity";
+import { Cart } from "../src/cart/entities/cart.entity";
+import { CartItem } from "../src/cart/entities/cart-item.entity";
+import { Product } from "../src/products/entities/product.entity";
+import { Category } from "../src/products/entities/category.entity";
+import { getRepositoryToken } from "@nestjs/typeorm";
+import { Review } from "../src/products/entities/review.entity";
 
-describe('CartController (e2e)', () => {
+describe("CartController (e2e)", () => {
   let app: INestApplication;
 
   const mockUser: Partial<User> = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-    email: 'test@example.com',
-    name: 'Test User',
+    id: "123e4567-e89b-12d3-a456-426614174000",
+    email: "test@example.com",
+    name: "Test User",
     role: Role.USER,
     created_at: new Date(),
     updated_at: new Date(),
@@ -29,13 +29,13 @@ describe('CartController (e2e)', () => {
   };
 
   const mockProduct: Partial<Product> = {
-    id: '123e4567-e89b-12d3-a456-426614174001',
-    name: 'Test Product',
-    description: 'Test Description',
+    id: "123e4567-e89b-12d3-a456-426614174001",
+    name: "Test Product",
+    description: "Test Description",
     price: 100,
     stock: 10,
-    images: ['test.jpg'],
-    category_id: '123e4567-e89b-12d3-a456-426614174002',
+    images: ["test.jpg"],
+    category_id: "123e4567-e89b-12d3-a456-426614174002",
     rating: 0,
     created_at: new Date(),
     updated_at: new Date(),
@@ -44,8 +44,8 @@ describe('CartController (e2e)', () => {
   };
 
   const mockCartItem: Partial<CartItem> = {
-    id: '123e4567-e89b-12d3-a456-426614174004',
-    cart_id: '123e4567-e89b-12d3-a456-426614174003',
+    id: "123e4567-e89b-12d3-a456-426614174004",
+    cart_id: "123e4567-e89b-12d3-a456-426614174003",
     product_id: mockProduct.id,
     quantity: 2,
     price: 100,
@@ -54,7 +54,7 @@ describe('CartController (e2e)', () => {
   };
 
   const mockCart: Partial<Cart> = {
-    id: '123e4567-e89b-12d3-a456-426614174003',
+    id: "123e4567-e89b-12d3-a456-426614174003",
     user_id: mockUser.id,
     items: [mockCartItem as CartItem],
     discount_amount: 0,
@@ -63,12 +63,16 @@ describe('CartController (e2e)', () => {
 
   const mockCartRepository = {
     findOne: jest.fn().mockResolvedValue(mockCart),
-    create: jest.fn().mockImplementation((data) => ({ ...data, id: 'new-cart-id' })),
+    create: jest
+      .fn()
+      .mockImplementation((data) => ({ ...data, id: "new-cart-id" })),
     save: jest.fn().mockImplementation((data) => Promise.resolve(data)),
   };
 
   const mockCartItemRepository = {
-    create: jest.fn().mockImplementation((data) => ({ ...data, id: 'new-cart-item-id' })),
+    create: jest
+      .fn()
+      .mockImplementation((data) => ({ ...data, id: "new-cart-item-id" })),
     save: jest.fn().mockImplementation((data) => Promise.resolve(data)),
     findOne: jest.fn().mockResolvedValue(mockCartItem),
     delete: jest.fn().mockResolvedValue({ affected: 1 }),
@@ -129,44 +133,44 @@ describe('CartController (e2e)', () => {
     await app.close();
   });
 
-  describe('GET /cart', () => {
-    it('should return cart with items', () => {
+  describe("GET /cart", () => {
+    it("should return cart with items", () => {
       return request(app.getHttpServer())
-        .get('/cart')
-        .set('Authorization', `Bearer mock-jwt-token`)
+        .get("/cart")
+        .set("Authorization", `Bearer mock-jwt-token`)
         .expect(200)
         .expect((res) => {
-          expect(res.body).toHaveProperty('items');
-          expect(res.body).toHaveProperty('total');
+          expect(res.body).toHaveProperty("items");
+          expect(res.body).toHaveProperty("total");
           expect(res.body.items).toHaveLength(1);
-          expect(res.body.items[0]).toHaveProperty('id');
-          expect(res.body.items[0]).toHaveProperty('product');
+          expect(res.body.items[0]).toHaveProperty("id");
+          expect(res.body.items[0]).toHaveProperty("product");
         });
     });
   });
 
-  describe('POST /cart/items', () => {
-    it('should add item to cart', () => {
+  describe("POST /cart/items", () => {
+    it("should add item to cart", () => {
       return request(app.getHttpServer())
-        .post('/cart/items')
-        .set('Authorization', `Bearer mock-jwt-token`)
+        .post("/cart/items")
+        .set("Authorization", `Bearer mock-jwt-token`)
         .send({
           product_id: mockProduct.id,
           quantity: 1,
         })
         .expect(201)
         .expect((res) => {
-          expect(res.body).toHaveProperty('id');
-          expect(res.body).toHaveProperty('cart_id');
-          expect(res.body).toHaveProperty('product_id');
-          expect(res.body).toHaveProperty('quantity');
+          expect(res.body).toHaveProperty("id");
+          expect(res.body).toHaveProperty("cart_id");
+          expect(res.body).toHaveProperty("product_id");
+          expect(res.body).toHaveProperty("quantity");
         });
     });
 
-    it('should return 400 for invalid quantity', () => {
+    it("should return 400 for invalid quantity", () => {
       return request(app.getHttpServer())
-        .post('/cart/items')
-        .set('Authorization', `Bearer mock-jwt-token`)
+        .post("/cart/items")
+        .set("Authorization", `Bearer mock-jwt-token`)
         .send({
           product_id: mockProduct.id,
           quantity: 0,
@@ -175,46 +179,46 @@ describe('CartController (e2e)', () => {
     });
   });
 
-  describe('DELETE /cart/items/:id', () => {
-    it('should remove item from cart', () => {
+  describe("DELETE /cart/items/:id", () => {
+    it("should remove item from cart", () => {
       return request(app.getHttpServer())
         .delete(`/cart/items/${mockCartItem.id}`)
-        .set('Authorization', `Bearer mock-jwt-token`)
+        .set("Authorization", `Bearer mock-jwt-token`)
         .expect(204);
     });
 
-    it('should return 404 for non-existent item', async () => {
+    it("should return 404 for non-existent item", async () => {
       // Mock findOne to return null for this test only
       mockCartItemRepository.findOne.mockResolvedValueOnce(null);
       await request(app.getHttpServer())
-        .delete('/cart/items/non-existent')
-        .set('Authorization', `Bearer mock-jwt-token`)
+        .delete("/cart/items/non-existent")
+        .set("Authorization", `Bearer mock-jwt-token`)
         .expect(404);
     });
   });
 
-  describe('POST /cart/apply-coupon', () => {
-    it('should apply coupon to cart', () => {
+  describe("POST /cart/apply-coupon", () => {
+    it("should apply coupon to cart", () => {
       return request(app.getHttpServer())
-        .post('/cart/apply-coupon')
-        .set('Authorization', `Bearer mock-jwt-token`)
+        .post("/cart/apply-coupon")
+        .set("Authorization", `Bearer mock-jwt-token`)
         .send({
-          code: 'TEST10',
+          code: "TEST10",
         })
         .expect(201)
         .expect((res) => {
-          expect(res.body).toHaveProperty('discounted_total');
+          expect(res.body).toHaveProperty("discounted_total");
         });
     });
 
-    it('should return 201 for invalid coupon', () => {
+    it("should return 201 for invalid coupon", () => {
       return request(app.getHttpServer())
-        .post('/cart/apply-coupon')
-        .set('Authorization', `Bearer mock-jwt-token`)
+        .post("/cart/apply-coupon")
+        .set("Authorization", `Bearer mock-jwt-token`)
         .send({
-          code: 'INVALID',
+          code: "INVALID",
         })
         .expect(201);
     });
   });
-}); 
+});

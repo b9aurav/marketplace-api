@@ -1,10 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { CartController } from './cart.controller';
-import { CartService } from './cart.service';
-import { AddCartItemDto } from './dto/add-cart-item.dto';
-import { ApplyCouponDto } from './dto/apply-coupon.dto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { CartController } from "./cart.controller";
+import { CartService } from "./cart.service";
+import { AddCartItemDto } from "./dto/add-cart-item.dto";
+import { ApplyCouponDto } from "./dto/apply-coupon.dto";
 
-describe('CartController', () => {
+describe("CartController", () => {
   let controller: CartController;
   let service: CartService;
 
@@ -16,20 +16,20 @@ describe('CartController', () => {
   };
 
   const mockUser = {
-    id: 'user-uuid-1234',
-    email: 'user@example.com',
+    id: "user-uuid-1234",
+    email: "user@example.com",
   };
 
   const mockCart = {
     items: [
       {
-        id: 'item-uuid-1234',
-        product_id: 'prod-uuid-1234',
+        id: "item-uuid-1234",
+        product_id: "prod-uuid-1234",
         quantity: 2,
         price: 100,
         product: {
-          id: 'prod-uuid-1234',
-          name: 'Test Product',
+          id: "prod-uuid-1234",
+          name: "Test Product",
         },
       },
     ],
@@ -37,9 +37,9 @@ describe('CartController', () => {
   };
 
   const mockCartItem = {
-    id: 'item-uuid-1234',
-    cart_id: 'cart-uuid-1234',
-    product_id: 'prod-uuid-1234',
+    id: "item-uuid-1234",
+    cart_id: "cart-uuid-1234",
+    product_id: "prod-uuid-1234",
     quantity: 2,
     price: 100,
   };
@@ -59,8 +59,8 @@ describe('CartController', () => {
     service = module.get<CartService>(CartService);
   });
 
-  describe('getCart', () => {
-    it('should return user cart', async () => {
+  describe("getCart", () => {
+    it("should return user cart", async () => {
       mockCartService.getCart.mockResolvedValue(mockCart);
 
       const result = await controller.getCart({ user: mockUser });
@@ -70,25 +70,28 @@ describe('CartController', () => {
     });
   });
 
-  describe('addItem', () => {
-    it('should add item to cart', async () => {
+  describe("addItem", () => {
+    it("should add item to cart", async () => {
       const addCartItemDto: AddCartItemDto = {
-        product_id: 'prod-uuid-1234',
+        product_id: "prod-uuid-1234",
         quantity: 2,
       };
 
       mockCartService.addItem.mockResolvedValue(mockCartItem);
 
-      const result = await controller.addItem({ user: mockUser }, addCartItemDto);
+      const result = await controller.addItem(
+        { user: mockUser },
+        addCartItemDto,
+      );
 
       expect(result).toEqual(mockCartItem);
       expect(service.addItem).toHaveBeenCalledWith(mockUser.id, addCartItemDto);
     });
   });
 
-  describe('removeItem', () => {
-    it('should remove item from cart', async () => {
-      const itemId = 'item-uuid-1234';
+  describe("removeItem", () => {
+    it("should remove item from cart", async () => {
+      const itemId = "item-uuid-1234";
 
       mockCartService.removeItem.mockResolvedValue(undefined);
 
@@ -99,10 +102,10 @@ describe('CartController', () => {
     });
   });
 
-  describe('applyCoupon', () => {
-    it('should apply coupon to cart', async () => {
+  describe("applyCoupon", () => {
+    it("should apply coupon to cart", async () => {
       const applyCouponDto: ApplyCouponDto = {
-        code: 'SAVE10',
+        code: "SAVE10",
       };
 
       const expectedResult = {
@@ -111,10 +114,16 @@ describe('CartController', () => {
 
       mockCartService.applyCoupon.mockResolvedValue(expectedResult);
 
-      const result = await controller.applyCoupon({ user: mockUser }, applyCouponDto);
+      const result = await controller.applyCoupon(
+        { user: mockUser },
+        applyCouponDto,
+      );
 
       expect(result).toEqual(expectedResult);
-      expect(service.applyCoupon).toHaveBeenCalledWith(mockUser.id, applyCouponDto.code);
+      expect(service.applyCoupon).toHaveBeenCalledWith(
+        mockUser.id,
+        applyCouponDto.code,
+      );
     });
   });
-}); 
+});

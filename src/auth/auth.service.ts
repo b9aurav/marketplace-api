@@ -1,13 +1,15 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
-import { User } from '../users/entities/user.entity';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { SupabaseService } from '../supabase/supabase.service';
-import { CreateUserDto } from '../users/dto/create-user.dto';
-import { Role } from '@/common/decorators/roles.decorator';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from "@nestjs/common";
+import { UsersService } from "../users/users.service";
+import { RegisterDto } from "./dto/register.dto";
+import { LoginDto } from "./dto/login.dto";
+
+import { ResetPasswordDto } from "./dto/reset-password.dto";
+import { SupabaseService } from "../supabase/supabase.service";
+import { CreateUserDto } from "../users/dto/create-user.dto";
 
 @Injectable()
 export class AuthService {
@@ -19,13 +21,13 @@ export class AuthService {
   async register(registerDto: RegisterDto) {
     try {
       // Register with Supabase
-      const { user, session } = await this.supabaseService.signUp(
+      const { user } = await this.supabaseService.signUp(
         registerDto.email,
-        registerDto.password
+        registerDto.password,
       );
 
       if (!user) {
-        throw new UnauthorizedException('Registration failed');
+        throw new UnauthorizedException("Registration failed");
       }
 
       // Create user in our database
@@ -39,7 +41,7 @@ export class AuthService {
       const dbUser = await this.usersService.create(createUserDto);
 
       return {
-        message: 'Registration successful',
+        message: "Registration successful",
         user: {
           id: dbUser.id,
           email: dbUser.email,
@@ -47,10 +49,10 @@ export class AuthService {
         },
       };
     } catch (error) {
-      if (error.message?.includes('already registered')) {
-        throw new ConflictException('Email already registered');
+      if (error.message?.includes("already registered")) {
+        throw new ConflictException("Email already registered");
       }
-      throw new UnauthorizedException(error.message || 'Registration failed');
+      throw new UnauthorizedException(error.message || "Registration failed");
     }
   }
 
@@ -59,24 +61,22 @@ export class AuthService {
       // Login with Supabase
       const { user, session } = await this.supabaseService.signIn(
         loginDto.email,
-        loginDto.password
+        loginDto.password,
       );
 
       if (!user || !session) {
-        throw new UnauthorizedException('Invalid credentials');
+        throw new UnauthorizedException("Invalid credentials");
       }
 
       // Get user from our database
       const dbUser = await this.usersService.findOne(user.id);
-      
+
       if (!dbUser) {
-        throw new UnauthorizedException('User not found in database');
+        throw new UnauthorizedException("User not found in database");
       }
 
-      
-
       return {
-        message: 'Login successful',
+        message: "Login successful",
         token: session.access_token,
         user: {
           id: dbUser.id,
@@ -89,17 +89,17 @@ export class AuthService {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-      if (error.message?.includes('Invalid login credentials')) {
-        throw new UnauthorizedException('Invalid credentials');
+      if (error.message?.includes("Invalid login credentials")) {
+        throw new UnauthorizedException("Invalid credentials");
       }
-      throw new UnauthorizedException(error.message || 'Login failed');
+      throw new UnauthorizedException(error.message || "Login failed");
     }
   }
 
   async getProfile(userId: string) {
     const user = await this.usersService.findOne(userId);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException("User not found");
     }
 
     return {
@@ -115,7 +115,7 @@ export class AuthService {
     try {
       await this.supabaseService.resetPassword(email);
       return {
-        message: 'Password reset email sent',
+        message: "Password reset email sent",
       };
     } catch (error) {
       throw new UnauthorizedException(error.message);
@@ -123,12 +123,12 @@ export class AuthService {
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<void> {
-    const { token, new_password } = resetPasswordDto;
-    
+    const { new_password } = resetPasswordDto;
+
     try {
       await this.supabaseService.updatePassword(new_password);
     } catch (error) {
-      throw new UnauthorizedException('Invalid or expired token');
+      throw new UnauthorizedException("Invalid or expired token");
     }
   }
 }

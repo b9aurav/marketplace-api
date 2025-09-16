@@ -1,7 +1,7 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { ICacheService } from './interfaces/cache.interface';
+import { Injectable, Inject, Logger } from "@nestjs/common";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
+import { ICacheService } from "./interfaces/cache.interface";
 
 @Injectable()
 export class CacheService implements ICacheService {
@@ -12,7 +12,7 @@ export class CacheService implements ICacheService {
   async get<T>(key: string): Promise<T | null> {
     try {
       const value = await this.cacheManager.get<T>(key);
-      this.logger.debug(`Cache GET: ${key} - ${value ? 'HIT' : 'MISS'}`);
+      this.logger.debug(`Cache GET: ${key} - ${value ? "HIT" : "MISS"}`);
       return value || null;
     } catch (error) {
       this.logger.error(`Cache GET error for key ${key}:`, error);
@@ -23,7 +23,7 @@ export class CacheService implements ICacheService {
   async set<T>(key: string, value: T, ttl?: number): Promise<void> {
     try {
       await this.cacheManager.set(key, value, ttl);
-      this.logger.debug(`Cache SET: ${key} with TTL ${ttl || 'default'}`);
+      this.logger.debug(`Cache SET: ${key} with TTL ${ttl || "default"}`);
     } catch (error) {
       this.logger.error(`Cache SET error for key ${key}:`, error);
       throw error;
@@ -50,16 +50,23 @@ export class CacheService implements ICacheService {
           const keys = await store.client.keys(pattern);
           if (keys.length > 0) {
             await Promise.all(keys.map((key: string) => this.del(key)));
-            this.logger.debug(`Cache DEL PATTERN: ${pattern} - deleted ${keys.length} keys`);
+            this.logger.debug(
+              `Cache DEL PATTERN: ${pattern} - deleted ${keys.length} keys`,
+            );
           }
         } else {
-          this.logger.warn(`Pattern deletion not supported for current cache store`);
+          this.logger.warn(
+            `Pattern deletion not supported for current cache store`,
+          );
         }
       } else {
         this.logger.warn(`No cache stores available for pattern deletion`);
       }
     } catch (error) {
-      this.logger.error(`Cache DEL PATTERN error for pattern ${pattern}:`, error);
+      this.logger.error(
+        `Cache DEL PATTERN error for pattern ${pattern}:`,
+        error,
+      );
       throw error;
     }
   }

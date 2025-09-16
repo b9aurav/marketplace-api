@@ -1,12 +1,7 @@
-import {
-  PipeTransform,
-  Injectable,
-  ArgumentMetadata,
-  BadRequestException,
-} from '@nestjs/common';
-import { validate } from 'class-validator';
-import { plainToInstance } from 'class-transformer';
-import { AdminValidationException } from '../exceptions/admin.exception';
+import { PipeTransform, Injectable, ArgumentMetadata } from "@nestjs/common";
+import { validate } from "class-validator";
+import { plainToInstance } from "class-transformer";
+import { AdminValidationException } from "../exceptions/admin.exception";
 
 @Injectable()
 export class AdminValidationPipe implements PipeTransform<any> {
@@ -23,23 +18,20 @@ export class AdminValidationPipe implements PipeTransform<any> {
     });
 
     if (errors.length > 0) {
-      const validationErrors = errors.map(error => ({
+      const validationErrors = errors.map((error) => ({
         field: error.property,
         constraints: error.constraints,
         value: error.value,
       }));
 
-      throw new AdminValidationException(
-        'Validation failed',
-        validationErrors
-      );
+      throw new AdminValidationException("Validation failed", validationErrors);
     }
 
     return object;
   }
 
-  private toValidate(metatype: Function): boolean {
-    const types: Function[] = [String, Boolean, Number, Array, Object];
+  private toValidate(metatype: any): boolean {
+    const types: any[] = [String, Boolean, Number, Array, Object];
     return !types.includes(metatype);
   }
 }

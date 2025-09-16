@@ -5,9 +5,9 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-} from '@nestjs/common';
-import { Request, Response } from 'express';
-import { AdminException } from '../exceptions/admin.exception';
+} from "@nestjs/common";
+import { Request, Response } from "express";
+import { AdminException } from "../exceptions/admin.exception";
 
 @Catch()
 export class AdminExceptionFilter implements ExceptionFilter {
@@ -21,8 +21,8 @@ export class AdminExceptionFilter implements ExceptionFilter {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let errorResponse: any = {
       error: {
-        code: 'INTERNAL_ERROR',
-        message: 'Internal server error',
+        code: "INTERNAL_ERROR",
+        message: "Internal server error",
         details: [],
       },
       timestamp: new Date().toISOString(),
@@ -39,11 +39,11 @@ export class AdminExceptionFilter implements ExceptionFilter {
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      
-      if (typeof exceptionResponse === 'object') {
+
+      if (typeof exceptionResponse === "object") {
         errorResponse = {
           error: {
-            code: 'HTTP_ERROR',
+            code: "HTTP_ERROR",
             message: (exceptionResponse as any).message || exception.message,
             details: (exceptionResponse as any).details || [],
           },
@@ -61,13 +61,13 @@ export class AdminExceptionFilter implements ExceptionFilter {
     if (status >= 500) {
       this.logger.error(
         `Admin API Error: ${errorResponse.error.message}`,
-        exception instanceof Error ? exception.stack : exception
+        exception instanceof Error ? exception.stack : exception,
       );
     } else {
-      this.logger.warn(
-        `Admin API Warning: ${errorResponse.error.message}`,
-        { path: request.url, method: request.method }
-      );
+      this.logger.warn(`Admin API Warning: ${errorResponse.error.message}`, {
+        path: request.url,
+        method: request.method,
+      });
     }
 
     response.status(status).json(errorResponse);

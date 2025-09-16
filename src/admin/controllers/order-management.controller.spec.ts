@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { OrderManagementController } from './order-management.controller';
-import { OrderManagementService } from '../services/order-management.service';
-import { AdminAuditInterceptor } from '../interceptors/admin-audit.interceptor';
-import { OrderStatus } from '../../orders/entities/order.entity';
+import { Test, TestingModule } from "@nestjs/testing";
+import { OrderManagementController } from "./order-management.controller";
+import { OrderManagementService } from "../services/order-management.service";
+import { AdminAuditInterceptor } from "../interceptors/admin-audit.interceptor";
+import { OrderStatus } from "../../orders/entities/order.entity";
 import {
   GetOrdersQueryDto,
   UpdateOrderStatusDto,
@@ -12,57 +12,57 @@ import {
   OrderDetailsDto,
   OrderAnalyticsDto,
   RefundResultDto,
-} from '../dto/order-management.dto';
+} from "../dto/order-management.dto";
 
-describe('OrderManagementController', () => {
+describe("OrderManagementController", () => {
   let controller: OrderManagementController;
   let service: jest.Mocked<OrderManagementService>;
 
   const mockPaginatedOrders: PaginatedOrdersDto = {
     orders: [
       {
-        id: '123e4567-e89b-12d3-a456-426614174000',
+        id: "123e4567-e89b-12d3-a456-426614174000",
         status: OrderStatus.PENDING,
-        total: 100.00,
-        fees: 5.00,
-        net_amount: 95.00,
-        tracking_number: 'TRK123',
-        payment_method: 'credit_card',
-        transaction_id: 'txn_123',
-        payment_method_details: { last4: '1234' },
-        admin_notes: 'Test order',
-        shipping_details: { carrier: 'UPS' },
-        coupon_code: 'SAVE10',
-        discount_amount: 10.00,
-        created_at: new Date('2023-01-01'),
-        updated_at: new Date('2023-01-01'),
+        total: 100.0,
+        fees: 5.0,
+        net_amount: 95.0,
+        tracking_number: "TRK123",
+        payment_method: "credit_card",
+        transaction_id: "txn_123",
+        payment_method_details: { last4: "1234" },
+        admin_notes: "Test order",
+        shipping_details: { carrier: "UPS" },
+        coupon_code: "SAVE10",
+        discount_amount: 10.0,
+        created_at: new Date("2023-01-01"),
+        updated_at: new Date("2023-01-01"),
         user: {
-          id: 'user123',
-          email: 'test@example.com',
-          name: 'Test User',
-          phone: '123-456-7890',
+          id: "user123",
+          email: "test@example.com",
+          name: "Test User",
+          phone: "123-456-7890",
         },
         address: {
-          id: 'addr123',
-          street: '123 Main St',
-          city: 'Test City',
-          state: 'TS',
-          postal_code: '12345',
-          country: 'US',
+          id: "addr123",
+          street: "123 Main St",
+          city: "Test City",
+          state: "TS",
+          postal_code: "12345",
+          country: "US",
         },
         items: [
           {
-            id: 'item123',
-            product_id: 'prod123',
-            product_name: 'Test Product',
+            id: "item123",
+            product_id: "prod123",
+            product_name: "Test Product",
             quantity: 2,
-            price: 50.00,
-            total: 100.00,
+            price: 50.0,
+            total: 100.0,
             product: {
-              id: 'prod123',
-              name: 'Test Product',
-              images: ['image1.jpg'],
-              sku: 'SKU123',
+              id: "prod123",
+              name: "Test Product",
+              images: ["image1.jpg"],
+              sku: "SKU123",
             },
           },
         ],
@@ -77,13 +77,13 @@ describe('OrderManagementController', () => {
   const mockOrderDetails: OrderDetailsDto = {
     ...mockPaginatedOrders.orders[0],
     tracking_info: {
-      location: 'Warehouse',
-      estimated_delivery: new Date('2023-01-10'),
+      location: "Warehouse",
+      estimated_delivery: new Date("2023-01-10"),
       updates: [
         {
-          timestamp: new Date('2023-01-01'),
-          status: 'Order placed',
-          location: 'Warehouse',
+          timestamp: new Date("2023-01-01"),
+          status: "Order placed",
+          location: "Warehouse",
         },
       ],
     },
@@ -107,14 +107,14 @@ describe('OrderManagementController', () => {
     },
     orders_trend: [
       {
-        date: '2023-01-01',
+        date: "2023-01-01",
         orders: 5,
         revenue: 500,
       },
     ],
     top_payment_methods: [
       {
-        method: 'credit_card',
+        method: "credit_card",
         count: 80,
         revenue: 8000,
       },
@@ -132,10 +132,10 @@ describe('OrderManagementController', () => {
 
   const mockRefundResult: RefundResultDto = {
     success: true,
-    refund_id: 'ref_123',
-    amount: 50.00,
-    message: 'Refund processed successfully',
-    transaction_id: 'txn_123',
+    refund_id: "ref_123",
+    amount: 50.0,
+    message: "Refund processed successfully",
+    transaction_id: "txn_123",
   };
 
   beforeEach(async () => {
@@ -154,22 +154,24 @@ describe('OrderManagementController', () => {
         },
       ],
     })
-    .overrideInterceptor(AdminAuditInterceptor)
-    .useValue({
-      intercept: jest.fn((context, next) => next.handle()),
-    })
-    .compile();
+      .overrideInterceptor(AdminAuditInterceptor)
+      .useValue({
+        intercept: jest.fn((context, next) => next.handle()),
+      })
+      .compile();
 
-    controller = module.get<OrderManagementController>(OrderManagementController);
+    controller = module.get<OrderManagementController>(
+      OrderManagementController,
+    );
     service = module.get(OrderManagementService);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 
-  describe('getOrders', () => {
-    it('should return paginated orders', async () => {
+  describe("getOrders", () => {
+    it("should return paginated orders", async () => {
       const query: GetOrdersQueryDto = {
         page: 1,
         limit: 10,
@@ -183,20 +185,20 @@ describe('OrderManagementController', () => {
       expect(result).toEqual(mockPaginatedOrders);
     });
 
-    it('should handle query parameters correctly', async () => {
+    it("should handle query parameters correctly", async () => {
       const query: GetOrdersQueryDto = {
         page: 2,
         limit: 20,
-        search: 'test@example.com',
+        search: "test@example.com",
         status: OrderStatus.PENDING,
-        user_id: 'user123',
-        payment_method: 'credit_card',
+        user_id: "user123",
+        payment_method: "credit_card",
         min_total: 50,
         max_total: 200,
-        date_from: '2023-01-01',
-        date_to: '2023-01-31',
-        sort_by: 'total',
-        sort_order: 'asc',
+        date_from: "2023-01-01",
+        date_to: "2023-01-31",
+        sort_by: "total",
+        sort_order: "asc",
       };
 
       service.getOrders.mockResolvedValue(mockPaginatedOrders);
@@ -208,9 +210,9 @@ describe('OrderManagementController', () => {
     });
   });
 
-  describe('getOrderDetails', () => {
-    it('should return order details', async () => {
-      const orderId = '123e4567-e89b-12d3-a456-426614174000';
+  describe("getOrderDetails", () => {
+    it("should return order details", async () => {
+      const orderId = "123e4567-e89b-12d3-a456-426614174000";
 
       service.getOrderDetails.mockResolvedValue(mockOrderDetails);
 
@@ -221,25 +223,28 @@ describe('OrderManagementController', () => {
     });
   });
 
-  describe('updateOrderStatus', () => {
-    it('should update order status successfully', async () => {
-      const orderId = '123e4567-e89b-12d3-a456-426614174000';
+  describe("updateOrderStatus", () => {
+    it("should update order status successfully", async () => {
+      const orderId = "123e4567-e89b-12d3-a456-426614174000";
       const updateData: UpdateOrderStatusDto = {
         status: OrderStatus.PAID,
-        admin_notes: 'Payment confirmed',
-        tracking_number: 'TRK456',
+        admin_notes: "Payment confirmed",
+        tracking_number: "TRK456",
       };
 
       service.updateOrderStatus.mockResolvedValue(undefined);
 
       const result = await controller.updateOrderStatus(orderId, updateData);
 
-      expect(service.updateOrderStatus).toHaveBeenCalledWith(orderId, updateData);
-      expect(result).toEqual({ message: 'Order status updated successfully' });
+      expect(service.updateOrderStatus).toHaveBeenCalledWith(
+        orderId,
+        updateData,
+      );
+      expect(result).toEqual({ message: "Order status updated successfully" });
     });
 
-    it('should handle minimal update data', async () => {
-      const orderId = '123e4567-e89b-12d3-a456-426614174000';
+    it("should handle minimal update data", async () => {
+      const orderId = "123e4567-e89b-12d3-a456-426614174000";
       const updateData: UpdateOrderStatusDto = {
         status: OrderStatus.SHIPPED,
       };
@@ -248,18 +253,21 @@ describe('OrderManagementController', () => {
 
       const result = await controller.updateOrderStatus(orderId, updateData);
 
-      expect(service.updateOrderStatus).toHaveBeenCalledWith(orderId, updateData);
-      expect(result).toEqual({ message: 'Order status updated successfully' });
+      expect(service.updateOrderStatus).toHaveBeenCalledWith(
+        orderId,
+        updateData,
+      );
+      expect(result).toEqual({ message: "Order status updated successfully" });
     });
   });
 
-  describe('processRefund', () => {
-    it('should process refund successfully', async () => {
-      const orderId = '123e4567-e89b-12d3-a456-426614174000';
+  describe("processRefund", () => {
+    it("should process refund successfully", async () => {
+      const orderId = "123e4567-e89b-12d3-a456-426614174000";
       const refundData: ProcessRefundDto = {
-        amount: 50.00,
-        reason: 'Customer request',
-        admin_notes: 'Approved by admin',
+        amount: 50.0,
+        reason: "Customer request",
+        admin_notes: "Approved by admin",
         notify_customer: true,
       };
 
@@ -271,11 +279,11 @@ describe('OrderManagementController', () => {
       expect(result).toEqual(mockRefundResult);
     });
 
-    it('should handle minimal refund data', async () => {
-      const orderId = '123e4567-e89b-12d3-a456-426614174000';
+    it("should handle minimal refund data", async () => {
+      const orderId = "123e4567-e89b-12d3-a456-426614174000";
       const refundData: ProcessRefundDto = {
-        amount: 25.00,
-        reason: 'Defective product',
+        amount: 25.0,
+        reason: "Defective product",
       };
 
       service.processRefund.mockResolvedValue(mockRefundResult);
@@ -287,12 +295,12 @@ describe('OrderManagementController', () => {
     });
   });
 
-  describe('getOrderAnalytics', () => {
-    it('should return order analytics', async () => {
+  describe("getOrderAnalytics", () => {
+    it("should return order analytics", async () => {
       const query: OrderAnalyticsQueryDto = {
-        date_from: '2023-01-01',
-        date_to: '2023-01-31',
-        interval: 'day',
+        date_from: "2023-01-01",
+        date_to: "2023-01-31",
+        interval: "day",
       };
 
       service.getOrderAnalytics.mockResolvedValue(mockOrderAnalytics);
@@ -303,11 +311,11 @@ describe('OrderManagementController', () => {
       expect(result).toEqual(mockOrderAnalytics);
     });
 
-    it('should handle analytics query with status filter', async () => {
+    it("should handle analytics query with status filter", async () => {
       const query: OrderAnalyticsQueryDto = {
-        date_from: '2023-01-01',
-        date_to: '2023-01-31',
-        interval: 'week',
+        date_from: "2023-01-01",
+        date_to: "2023-01-31",
+        interval: "week",
         status: OrderStatus.DELIVERED,
       };
 
@@ -319,11 +327,11 @@ describe('OrderManagementController', () => {
       expect(result).toEqual(mockOrderAnalytics);
     });
 
-    it('should handle different interval types', async () => {
+    it("should handle different interval types", async () => {
       const query: OrderAnalyticsQueryDto = {
-        date_from: '2023-01-01',
-        date_to: '2023-12-31',
-        interval: 'month',
+        date_from: "2023-01-01",
+        date_to: "2023-12-31",
+        interval: "month",
       };
 
       service.getOrderAnalytics.mockResolvedValue(mockOrderAnalytics);

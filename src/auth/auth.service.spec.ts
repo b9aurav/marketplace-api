@@ -1,15 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from './auth.service';
-import { UsersService } from '../users/users.service';
-import { SupabaseService } from '../supabase/supabase.service';
-import { UnauthorizedException, ConflictException } from '@nestjs/common';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { AuthService } from "./auth.service";
+import { UsersService } from "../users/users.service";
+import { SupabaseService } from "../supabase/supabase.service";
+import { UnauthorizedException, ConflictException } from "@nestjs/common";
+import { RegisterDto } from "./dto/register.dto";
+import { LoginDto } from "./dto/login.dto";
 
-describe('AuthService', () => {
+describe("AuthService", () => {
   let service: AuthService;
-  let usersService: UsersService;
-  let supabaseService: SupabaseService;
 
   const mockUsersService = {
     create: jest.fn(),
@@ -40,35 +38,33 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    usersService = module.get<UsersService>(UsersService);
-    supabaseService = module.get<SupabaseService>(SupabaseService);
 
     // Reset all mocks before each test
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(service).toBeDefined();
   });
 
-  describe('register', () => {
+  describe("register", () => {
     const registerDto: RegisterDto = {
-      email: 'user@example.com',
-      password: 'password123',
-      name: 'Test User',
-      phone: '+1234567890',
+      email: "user@example.com",
+      password: "password123",
+      name: "Test User",
+      phone: "+1234567890",
     };
 
     const mockSupabaseUser = {
-      id: 'user-id',
-      email: 'test@example.com',
+      id: "user-id",
+      email: "test@example.com",
     };
 
     const mockSession = {
-      token: 'access-token',
+      token: "access-token",
     };
 
-    it('should register a new user successfully', async () => {
+    it("should register a new user successfully", async () => {
       mockSupabaseService.signUp.mockResolvedValue({
         user: mockSupabaseUser,
         session: mockSession,
@@ -83,7 +79,7 @@ describe('AuthService', () => {
       const result = await service.register(registerDto);
 
       expect(result).toEqual({
-        message: 'Registration successful',
+        message: "Registration successful",
         user: {
           id: mockSupabaseUser.id,
           email: registerDto.email,
@@ -104,43 +100,49 @@ describe('AuthService', () => {
       });
     });
 
-    it('should throw ConflictException if email is already registered', async () => {
+    it("should throw ConflictException if email is already registered", async () => {
       mockSupabaseService.signUp.mockRejectedValue({
-        message: 'User already registered',
+        message: "User already registered",
       });
 
-      await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
+      await expect(service.register(registerDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
-    it('should throw UnauthorizedException if registration fails', async () => {
-      mockSupabaseService.signUp.mockRejectedValue(new Error('Registration failed'));
+    it("should throw UnauthorizedException if registration fails", async () => {
+      mockSupabaseService.signUp.mockRejectedValue(
+        new Error("Registration failed"),
+      );
 
-      await expect(service.register(registerDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.register(registerDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
-  describe('login', () => {
+  describe("login", () => {
     const loginDto: LoginDto = {
-      email: 'user@example.com',
-      password: 'password123',
+      email: "user@example.com",
+      password: "password123",
     };
 
     const mockSupabaseUser = {
-      id: 'user-id',
-      email: 'user@example.com',
+      id: "user-id",
+      email: "user@example.com",
     };
 
     const mockSession = {
-      token: 'access-token',
+      token: "access-token",
     };
 
     const mockDbUser = {
-      id: 'user-id',
-      email: 'user@example.com',
-      name: 'Test User',
+      id: "user-id",
+      email: "user@example.com",
+      name: "Test User",
     };
 
-    it('should login user successfully', async () => {
+    it("should login user successfully", async () => {
       mockSupabaseService.signIn.mockResolvedValue({
         user: mockSupabaseUser,
         session: mockSession,
@@ -151,7 +153,7 @@ describe('AuthService', () => {
       const result = await service.login(loginDto);
 
       expect(result).toEqual({
-        message: 'Login successful',
+        message: "Login successful",
         token: mockSession.token,
         user: {
           id: mockDbUser.id,
@@ -165,18 +167,22 @@ describe('AuthService', () => {
         loginDto.password,
       );
 
-      expect(mockUsersService.findOne).toHaveBeenCalledWith(mockSupabaseUser.id);
+      expect(mockUsersService.findOne).toHaveBeenCalledWith(
+        mockSupabaseUser.id,
+      );
     });
 
-    it('should throw UnauthorizedException if credentials are invalid', async () => {
+    it("should throw UnauthorizedException if credentials are invalid", async () => {
       mockSupabaseService.signIn.mockRejectedValue({
-        message: 'Invalid login credentials',
+        message: "Invalid login credentials",
       });
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
-    it('should throw UnauthorizedException if user not found in database', async () => {
+    it("should throw UnauthorizedException if user not found in database", async () => {
       mockSupabaseService.signIn.mockResolvedValue({
         user: mockSupabaseUser,
         session: mockSession,
@@ -184,21 +190,23 @@ describe('AuthService', () => {
 
       mockUsersService.findOne.mockResolvedValue(null);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
-  describe('getProfile', () => {
-    const userId = 'user-id';
+  describe("getProfile", () => {
+    const userId = "user-id";
     const mockUser = {
       id: userId,
-      email: 'test@example.com',
-      name: 'Test User',
-      phone: '+1234567890',
-      role: 'user',
+      email: "test@example.com",
+      name: "Test User",
+      phone: "+1234567890",
+      role: "user",
     };
 
-    it('should return user profile', async () => {
+    it("should return user profile", async () => {
       mockUsersService.findOne.mockResolvedValue(mockUser);
 
       const result = await service.getProfile(userId);
@@ -207,52 +215,66 @@ describe('AuthService', () => {
       expect(mockUsersService.findOne).toHaveBeenCalledWith(userId);
     });
 
-    it('should throw UnauthorizedException if user not found', async () => {
+    it("should throw UnauthorizedException if user not found", async () => {
       mockUsersService.findOne.mockResolvedValue(null);
 
-      await expect(service.getProfile(userId)).rejects.toThrow(UnauthorizedException);
+      await expect(service.getProfile(userId)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
-  describe('forgotPassword', () => {
-    const email = 'test@example.com';
+  describe("forgotPassword", () => {
+    const email = "test@example.com";
 
-    it('should send password reset email', async () => {
+    it("should send password reset email", async () => {
       mockSupabaseService.resetPassword.mockResolvedValue(undefined);
 
       const result = await service.forgotPassword(email);
 
       expect(result).toEqual({
-        message: 'Password reset email sent',
+        message: "Password reset email sent",
       });
 
       expect(mockSupabaseService.resetPassword).toHaveBeenCalledWith(email);
     });
 
-    it('should throw UnauthorizedException if reset fails', async () => {
-      mockSupabaseService.resetPassword.mockRejectedValue(new Error('Reset failed'));
+    it("should throw UnauthorizedException if reset fails", async () => {
+      mockSupabaseService.resetPassword.mockRejectedValue(
+        new Error("Reset failed"),
+      );
 
-      await expect(service.forgotPassword(email)).rejects.toThrow(UnauthorizedException);
+      await expect(service.forgotPassword(email)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
-  describe('resetPassword', () => {
+  describe("resetPassword", () => {
     const resetPasswordDto = {
-      token: 'reset-token',
-      new_password: 'newpassword123',
+      token: "reset-token",
+      new_password: "newpassword123",
     };
 
-    it('should reset password successfully', async () => {
+    it("should reset password successfully", async () => {
       mockSupabaseService.updatePassword.mockResolvedValue(undefined);
 
-      await expect(service.resetPassword(resetPasswordDto)).resolves.not.toThrow();
-      expect(mockSupabaseService.updatePassword).toHaveBeenCalledWith(resetPasswordDto.new_password);
+      await expect(
+        service.resetPassword(resetPasswordDto),
+      ).resolves.not.toThrow();
+      expect(mockSupabaseService.updatePassword).toHaveBeenCalledWith(
+        resetPasswordDto.new_password,
+      );
     });
 
-    it('should throw UnauthorizedException if reset fails', async () => {
-      mockSupabaseService.updatePassword.mockRejectedValue(new Error('Reset failed'));
+    it("should throw UnauthorizedException if reset fails", async () => {
+      mockSupabaseService.updatePassword.mockRejectedValue(
+        new Error("Reset failed"),
+      );
 
-      await expect(service.resetPassword(resetPasswordDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.resetPassword(resetPasswordDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
-}); 
+});

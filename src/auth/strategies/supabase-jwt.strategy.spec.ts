@@ -1,22 +1,21 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import { SupabaseService } from '../../supabase/supabase.service';
-import { UsersService } from '../../users/users.service';
-import { SupabaseJwtStrategy } from './supabase-jwt.strategy';
-import { Role } from '../../common/decorators/roles.decorator';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ConfigService } from "@nestjs/config";
+import { SupabaseService } from "../../supabase/supabase.service";
+import { UsersService } from "../../users/users.service";
+import { SupabaseJwtStrategy } from "./supabase-jwt.strategy";
+import { Role } from "../../common/decorators/roles.decorator";
 
-describe('SupabaseJwtStrategy', () => {
+describe("SupabaseJwtStrategy", () => {
   let strategy: SupabaseJwtStrategy;
-  let supabaseService: SupabaseService;
   let usersService: UsersService;
 
   const mockConfigService = {
     get: jest.fn((key: string) => {
       switch (key) {
-        case 'SUPABASE_URL':
-          return 'https://test.supabase.co';
-        case 'SUPABASE_JWT_SECRET':
-          return 'test-jwt-secret';
+        case "SUPABASE_URL":
+          return "https://test.supabase.co";
+        case "SUPABASE_JWT_SECRET":
+          return "test-jwt-secret";
         default:
           return null;
       }
@@ -26,7 +25,7 @@ describe('SupabaseJwtStrategy', () => {
   const mockSupabaseService = {
     getPublicKey: jest.fn().mockResolvedValue({
       data: {
-        publicKey: 'test-public-key',
+        publicKey: "test-public-key",
       },
     }),
   };
@@ -55,25 +54,24 @@ describe('SupabaseJwtStrategy', () => {
     }).compile();
 
     strategy = module.get<SupabaseJwtStrategy>(SupabaseJwtStrategy);
-    supabaseService = module.get<SupabaseService>(SupabaseService);
     usersService = module.get<UsersService>(UsersService);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(strategy).toBeDefined();
   });
 
-  describe('validate', () => {
-    it('should return user object from database', async () => {
+  describe("validate", () => {
+    it("should return user object from database", async () => {
       const payload = {
-        sub: 'user-id',
-        email: 'test@example.com',
+        sub: "user-id",
+        email: "test@example.com",
       };
 
       const mockUser = {
-        id: 'user-id',
-        email: 'user@example.com',
-        name: 'Test User',
+        id: "user-id",
+        email: "user@example.com",
+        name: "Test User",
         role: Role.USER,
       };
 
@@ -82,24 +80,24 @@ describe('SupabaseJwtStrategy', () => {
       const result = await strategy.validate(payload);
 
       expect(result).toEqual({
-        id: 'user-id',
-        email: 'user@example.com',
-        name: 'Test User',
+        id: "user-id",
+        email: "user@example.com",
+        name: "Test User",
         role: Role.USER,
       });
-      expect(usersService.findOne).toHaveBeenCalledWith('user-id');
+      expect(usersService.findOne).toHaveBeenCalledWith("user-id");
     });
 
-    it('should return admin user with admin role', async () => {
+    it("should return admin user with admin role", async () => {
       const payload = {
-        sub: 'admin-id',
-        email: 'admin@example.com',
+        sub: "admin-id",
+        email: "admin@example.com",
       };
 
       const mockAdminUser = {
-        id: 'admin-id',
-        email: 'admin@example.com',
-        name: 'Admin User',
+        id: "admin-id",
+        email: "admin@example.com",
+        name: "Admin User",
         role: Role.ADMIN,
       };
 
@@ -108,24 +106,26 @@ describe('SupabaseJwtStrategy', () => {
       const result = await strategy.validate(payload);
 
       expect(result).toEqual({
-        id: 'admin-id',
-        email: 'admin@example.com',
-        name: 'Admin User',
+        id: "admin-id",
+        email: "admin@example.com",
+        name: "Admin User",
         role: Role.ADMIN,
       });
-      expect(usersService.findOne).toHaveBeenCalledWith('admin-id');
+      expect(usersService.findOne).toHaveBeenCalledWith("admin-id");
     });
 
-    it('should throw UnauthorizedException if user not found', async () => {
+    it("should throw UnauthorizedException if user not found", async () => {
       const payload = {
-        sub: 'non-existent-user',
-        email: 'test@example.com',
+        sub: "non-existent-user",
+        email: "test@example.com",
       };
 
       mockUsersService.findOne.mockResolvedValue(null);
 
-      await expect(strategy.validate(payload)).rejects.toThrow('Invalid token or user not found');
-      expect(usersService.findOne).toHaveBeenCalledWith('non-existent-user');
+      await expect(strategy.validate(payload)).rejects.toThrow(
+        "Invalid token or user not found",
+      );
+      expect(usersService.findOne).toHaveBeenCalledWith("non-existent-user");
     });
   });
-}); 
+});

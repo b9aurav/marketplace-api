@@ -1,16 +1,16 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 
 export class AdminSuccessResponseDto<T> {
-  @ApiProperty({ example: 'success' })
+  @ApiProperty({ example: "success" })
   status: string;
 
-  @ApiProperty({ example: 'Operation completed successfully' })
+  @ApiProperty({ example: "Operation completed successfully" })
   message: string;
 
   @ApiProperty()
   data: T;
 
-  @ApiProperty({ example: '2023-12-01T10:00:00.000Z' })
+  @ApiProperty({ example: "2023-12-01T10:00:00.000Z" })
   timestamp: string;
 }
 
@@ -35,10 +35,10 @@ export class AdminPaginationDto {
 }
 
 export class AdminPaginatedResponseDto<T> {
-  @ApiProperty({ example: 'success' })
+  @ApiProperty({ example: "success" })
   status: string;
 
-  @ApiProperty({ example: 'Data retrieved successfully' })
+  @ApiProperty({ example: "Data retrieved successfully" })
   message: string;
 
   @ApiProperty()
@@ -47,7 +47,7 @@ export class AdminPaginatedResponseDto<T> {
   @ApiProperty()
   pagination: AdminPaginationDto;
 
-  @ApiProperty({ example: '2023-12-01T10:00:00.000Z' })
+  @ApiProperty({ example: "2023-12-01T10:00:00.000Z" })
   timestamp: string;
 }
 
@@ -59,9 +59,9 @@ export class AdminErrorResponseDto {
     details: any[];
   };
 
-  @ApiProperty({ example: '2023-12-01T10:00:00.000Z' })
+  @ApiProperty({ example: "2023-12-01T10:00:00.000Z" })
   timestamp: string;
 
-  @ApiProperty({ example: '/api/admin/users' })
+  @ApiProperty({ example: "/api/admin/users" })
   path: string;
 }
