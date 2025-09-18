@@ -18,7 +18,8 @@ import {
   ApiBearerAuth,
   ApiParam,
 } from "@nestjs/swagger";
-import { AdminGuard } from "../guards/admin.guard";
+import { AdminGuard } from '../guards/admin.guard';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { AdminAuditInterceptor } from "../interceptors/admin-audit.interceptor";
 import { UserManagementService } from "../services/user-management.service";
 import { GetUser } from "../../common/decorators/get-user.decorator";
@@ -34,8 +35,8 @@ import {
 
 @ApiTags("Admin - User Management")
 @ApiBearerAuth()
-@Controller("api/admin/users")
-@UseGuards(AdminGuard)
+@Controller("admin/users")
+@UseGuards(JwtAuthGuard, AdminGuard)
 @UseInterceptors(AdminAuditInterceptor)
 export class UserManagementController {
   private readonly logger = new Logger(UserManagementController.name);
@@ -62,7 +63,6 @@ export class UserManagementController {
     description: "Forbidden - Insufficient permissions",
   })
   async getUsers(@Query() query: GetUsersQueryDto): Promise<PaginatedUsersDto> {
-    this.logger.log(`Getting users list with query: ${JSON.stringify(query)}`);
     return this.userManagementService.getUsers(query);
   }
 

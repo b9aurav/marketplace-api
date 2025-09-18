@@ -4,9 +4,11 @@ import { ICacheKeyGenerator } from "./interfaces/cache.interface";
 @Injectable()
 export class CacheKeyGenerator implements ICacheKeyGenerator {
   private readonly separator = ":";
+  private readonly currentVersion = "v1"; // Schema version for cache keys
 
-  generateKey(prefix: string, params: Record<string, any>): string {
-    const keyParts = [prefix];
+  generateKey(prefix: string, params: Record<string, any>, version?: string): string {
+    const keyVersion = version || this.currentVersion;
+    const keyParts = [keyVersion, prefix];
 
     // Sort params by key to ensure consistent key generation
     const sortedParams = Object.keys(params)
@@ -38,15 +40,17 @@ export class CacheKeyGenerator implements ICacheKeyGenerator {
     return keyParts.join(this.separator);
   }
 
-  generatePatternKey(prefix: string, pattern: string): string {
-    return `${prefix}${this.separator}${pattern}`;
+  generatePatternKey(prefix: string, pattern: string, version?: string): string {
+    const keyVersion = version || this.currentVersion;
+    return `${keyVersion}${this.separator}${prefix}${this.separator}${pattern}`;
   }
 
   /**
    * Generate a simple key with just prefix and identifier
    */
-  generateSimpleKey(prefix: string, id: string | number): string {
-    return `${prefix}${this.separator}${id}`;
+  generateSimpleKey(prefix: string, id: string | number, version?: string): string {
+    const keyVersion = version || this.currentVersion;
+    return `${keyVersion}${this.separator}${prefix}${this.separator}${id}`;
   }
 
   /**
@@ -57,13 +61,14 @@ export class CacheKeyGenerator implements ICacheKeyGenerator {
     page: number = 1,
     limit: number = 10,
     filters: Record<string, any> = {},
+    version?: string,
   ): string {
     const params = {
       page,
       limit,
       ...filters,
     };
-    return this.generateKey(prefix, params);
+    return this.generateKey(prefix, params, version);
   }
 
   /**
@@ -74,6 +79,7 @@ export class CacheKeyGenerator implements ICacheKeyGenerator {
     dateFrom?: Date,
     dateTo?: Date,
     interval?: string,
+    version?: string,
   ): string {
     const params: Record<string, any> = {};
 
@@ -87,6 +93,28 @@ export class CacheKeyGenerator implements ICacheKeyGenerator {
       params.interval = interval;
     }
 
-    return this.generateKey(prefix, params);
+    return this.generateKey(prefix, params, version);
+  }
+
+  /**
+   * Generate versioned key for schema changes
+   */
+  generateVersionedKey(prefix: string, params: Record<string, any>, version: string): string {
+    return this.generateKey(prefix, params, version);
+  }
+
+  /**
+   * Get current cache version
+   */
+  getCurrentVersion(): string {
+    return this.currentVersion;
+  }
+
+  /**
+   * Generate invalidation pattern for version
+   */
+  generateVersionPattern(version?: string): string {
+    const keyVersion = version || this.currentVersion;
+    return `${keyVersion}${this.separator}*`;
   }
 }

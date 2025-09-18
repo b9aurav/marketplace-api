@@ -9,6 +9,13 @@ import { Repository, SelectQueryBuilder, In } from "typeorm";
 import { Product, ProductStatus } from "../../products/entities/product.entity";
 import { Category } from "../../products/entities/category.entity";
 import { CacheService } from "../../common/cache/cache.service";
+import { 
+  CacheList, 
+  Cache, 
+  CacheAnalytics, 
+  CacheInvalidate 
+} from "../../common/cache/decorators/cache.decorator";
+import { CACHE_PATTERNS } from "../../common/cache/constants/cache.constants";
 import {
   GetProductsQueryDto,
   AdminCreateProductDto,
@@ -44,6 +51,7 @@ export class ProductManagementService {
     private readonly cacheService: CacheService,
   ) {}
 
+  @CacheList(CACHE_TTL.PRODUCT_LIST)
   async getProducts(query: GetProductsQueryDto): Promise<PaginatedProductsDto> {
     const cacheKey = this.generateCacheKey(CACHE_KEYS.PRODUCT_LIST, query);
 
@@ -105,13 +113,11 @@ export class ProductManagementService {
     );
 
     const result: PaginatedProductsDto = {
-      data: productDtos,
-      pagination: {
-        total,
-        page,
-        limit,
-        total_pages: Math.ceil(total / limit),
-      },
+      products: productDtos,
+      total,
+      page,
+      limit,
+      total_pages: Math.ceil(total / limit),
     };
 
     // Cache the result
@@ -120,6 +126,7 @@ export class ProductManagementService {
     return result;
   }
 
+  @Cache({ ttl: CACHE_TTL.PRODUCT_DETAILS, keyGenerator: (args) => `product:${args[0]}` })
   async getProductDetails(id: string): Promise<ProductDetailsDto> {
     const cacheKey = `${CACHE_KEYS.PRODUCT_DETAILS}:${id}`;
 
@@ -150,6 +157,7 @@ export class ProductManagementService {
     return productDto;
   }
 
+  @CacheInvalidate([CACHE_PATTERNS.PRODUCTS])
   async createProduct(data: AdminCreateProductDto): Promise<ProductDetailsDto> {
     // Check if SKU already exists
     const existingProduct = await this.productRepository.findOne({
@@ -226,6 +234,7 @@ export class ProductManagementService {
     return this.getProductDetails(updatedProduct.id);
   }
 
+  @CacheInvalidate([CACHE_PATTERNS.PRODUCTS])
   async deleteProduct(id: string): Promise<void> {
     const product = await this.productRepository.findOne({ where: { id } });
 
@@ -241,6 +250,7 @@ export class ProductManagementService {
     await this.invalidateProductCaches(id);
   }
 
+  @CacheInvalidate([CACHE_PATTERNS.PRODUCTS])
   async updateInventory(id: string, data: UpdateInventoryDto): Promise<void> {
     const product = await this.productRepository.findOne({ where: { id } });
 
@@ -260,6 +270,7 @@ export class ProductManagementService {
     await this.invalidateProductCaches(id);
   }
 
+  @CacheInvalidate([CACHE_PATTERNS.PRODUCTS])
   async bulkAction(data: BulkProductActionDto): Promise<void> {
     const { product_ids, action } = data;
 

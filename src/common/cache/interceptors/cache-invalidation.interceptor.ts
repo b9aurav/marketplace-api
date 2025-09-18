@@ -30,20 +30,25 @@ export class CacheInvalidationInterceptor implements NestInterceptor {
     }
 
     return next.handle().pipe(
-      tap(async () => {
-        try {
-          // Invalidate cache patterns after successful method execution
-          await Promise.all(
-            invalidationPatterns.map(async (pattern) => {
-              await this.cacheService.delPattern(pattern);
-              this.logger.debug(`Invalidated cache pattern: ${pattern}`);
-            }),
-          );
-        } catch (error) {
-          this.logger.error("Cache invalidation error:", error);
-          // Don't throw error to avoid breaking the main operation
+      tap(async (result) => {
+        // Only invalidate cache if the operation was successful
+        if (result !== null && result !== undefined) {
+          await this.invalidateCachePatterns(invalidationPatterns);
         }
       }),
     );
+  }
+
+  private async invalidateCachePatterns(patterns: string[]): Promise<void> {
+    const invalidationPromises = patterns.map(async (pattern) => {
+      try {
+        await this.cacheService.delPattern(pattern);
+        this.logger.debug(`Invalidated cache pattern: ${pattern}`);
+      } catch (error) {
+        this.logger.error(`Failed to invalidate cache pattern ${pattern}:`, error);
+      }
+    });
+
+    await Promise.allSettled(invalidationPromises);
   }
 }

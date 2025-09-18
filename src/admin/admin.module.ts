@@ -14,6 +14,7 @@ import { ProductManagementService } from "./services/product-management.service"
 import { OrderManagementService } from "./services/order-management.service";
 import { FileUploadService } from "./services/file-upload.service";
 import { DashboardService } from "./services/dashboard.service";
+import { CategoryManagementService } from "./services/category-management.service";
 import { AdminGuard } from "./guards/admin.guard";
 import { AdminAuditInterceptor } from "./interceptors/admin-audit.interceptor";
 import { AdminTestController } from "./controllers/admin-test.controller";
@@ -22,6 +23,8 @@ import { ProductManagementController } from "./controllers/product-management.co
 import { OrderManagementController } from "./controllers/order-management.controller";
 import { FileUploadController } from "./controllers/file-upload.controller";
 import { DashboardController } from "./controllers/dashboard.controller";
+import { CategoryManagementController } from "./controllers/category-management.controller";
+import { CacheManagementController } from "./controllers/cache-management.controller";
 import { CacheModule } from "../common/cache/cache.module";
 import { AuthModule } from "../auth/auth.module";
 
@@ -47,6 +50,8 @@ import { AuthModule } from "../auth/auth.module";
     OrderManagementController,
     FileUploadController,
     DashboardController,
+    CategoryManagementController,
+    CacheManagementController,
   ],
   providers: [
     AdminAuditService,
@@ -55,6 +60,7 @@ import { AuthModule } from "../auth/auth.module";
     OrderManagementService,
     FileUploadService,
     DashboardService,
+    CategoryManagementService,
     AdminGuard,
     AdminAuditInterceptor,
   ],
@@ -65,6 +71,7 @@ import { AuthModule } from "../auth/auth.module";
     OrderManagementService,
     FileUploadService,
     DashboardService,
+    CategoryManagementService,
     AdminGuard,
     AdminAuditInterceptor,
   ],

@@ -4,6 +4,10 @@ import { CacheModule as NestCacheModule } from "@nestjs/cache-manager";
 import { redisStore } from "cache-manager-redis-store";
 import { CacheService } from "./cache.service";
 import { CacheKeyGenerator } from "./cache-key-generator.service";
+import { CacheWarmingService } from "./services/cache-warming.service";
+import { CacheMonitoringService } from "./services/cache-monitoring.service";
+import { CacheInterceptor } from "./interceptors/cache.interceptor";
+import { CacheInvalidationInterceptor } from "./interceptors/cache-invalidation.interceptor";
 
 @Global()
 @Module({
@@ -19,16 +23,33 @@ import { CacheKeyGenerator } from "./cache-key-generator.service";
           },
           password: configService.get("REDIS_PASSWORD"),
           database: configService.get("REDIS_DB", 0),
+          // Configure LRU eviction and memory management
+          maxmemoryPolicy: 'allkeys-lru',
         });
 
         return {
           store: () => store,
           ttl: configService.get("CACHE_TTL", 300), // 5 minutes default
+          max: configService.get("CACHE_MAX_ITEMS", 1000), // Maximum items in cache
         };
       },
     }),
   ],
-  providers: [CacheService, CacheKeyGenerator],
-  exports: [CacheService, CacheKeyGenerator],
+  providers: [
+    CacheService,
+    CacheKeyGenerator,
+    CacheWarmingService,
+    CacheMonitoringService,
+    CacheInterceptor,
+    CacheInvalidationInterceptor,
+  ],
+  exports: [
+    CacheService,
+    CacheKeyGenerator,
+    CacheWarmingService,
+    CacheMonitoringService,
+    CacheInterceptor,
+    CacheInvalidationInterceptor,
+  ],
 })
 export class CacheModule {}

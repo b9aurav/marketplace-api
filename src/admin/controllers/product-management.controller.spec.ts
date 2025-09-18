@@ -16,7 +16,7 @@ import {
 class TestProductManagementController {
   constructor(
     private readonly productManagementService: ProductManagementService,
-  ) {}
+  ) { }
 
   async getProducts(query: GetProductsQueryDto): Promise<PaginatedProductsDto> {
     return this.productManagementService.getProducts(query);
@@ -102,13 +102,12 @@ describe("ProductManagementController", () => {
   };
 
   const mockPaginatedProducts: PaginatedProductsDto = {
-    data: [mockProductDetails],
-    pagination: {
-      total: 1,
-      page: 1,
-      limit: 10,
-      total_pages: 1,
-    },
+    products: [mockProductDetails],
+    total: 1,
+    page: 1,
+    limit: 10,
+    total_pages: 1,
+
   };
 
   const mockAnalytics: ProductAnalyticsDto = {

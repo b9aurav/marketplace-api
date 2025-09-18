@@ -20,18 +20,11 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
     next: CallHandler,
   ): Observable<Response<T>> {
     return next.handle().pipe(
-      map((data) => {
-        // Extract pagination if it exists
-        const pagination = data && data.pagination ? data.pagination : null;
-        const responseData = pagination ? data.data : data;
-
-        return {
-          status: "success",
-          data: responseData,
-          message: "",
-          ...(pagination && { pagination }),
-        };
-      }),
+      map((data) => ({
+        status: "success",
+        data: data,
+        message: "",
+      })),
     );
   }
 }

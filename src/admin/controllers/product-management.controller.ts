@@ -40,7 +40,7 @@ import {
 } from "../dto/product-management.dto";
 
 @ApiTags("Admin - Product Management")
-@Controller("api/admin/products")
+@Controller("admin/products")
 @UseGuards(JwtAuthGuard, AdminGuard)
 @UseInterceptors(AdminAuditInterceptor)
 @ApiBearerAuth()

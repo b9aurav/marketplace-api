@@ -23,7 +23,7 @@ describe("CacheKeyGenerator", () => {
 
       const result = service.generateKey(prefix, params);
 
-      expect(result).toBe("admin:users:limit=10:page=1:search=john");
+      expect(result).toBe("v1:admin:users:limit=10:page=1:search=john");
     });
 
     it("should handle empty params", () => {
@@ -32,7 +32,7 @@ describe("CacheKeyGenerator", () => {
 
       const result = service.generateKey(prefix, params);
 
-      expect(result).toBe("admin:users");
+      expect(result).toBe("v1:admin:users");
     });
 
     it("should handle null and undefined values", () => {
@@ -41,7 +41,7 @@ describe("CacheKeyGenerator", () => {
 
       const result = service.generateKey(prefix, params);
 
-      expect(result).toBe("admin:users:page=1");
+      expect(result).toBe("v1:admin:users:page=1");
     });
 
     it("should handle object values", () => {
@@ -51,7 +51,7 @@ describe("CacheKeyGenerator", () => {
       const result = service.generateKey(prefix, params);
 
       expect(result).toBe(
-        'admin:users:filters={"status":"active","role":"admin"}',
+        'v1:admin:users:filters={"status":"active","role":"admin"}',
       );
     });
 
@@ -61,7 +61,7 @@ describe("CacheKeyGenerator", () => {
 
       const result = service.generateKey(prefix, params);
 
-      expect(result).toBe("admin:products:categories=electronics,books");
+      expect(result).toBe("v1:admin:products:categories=electronics,books");
     });
 
     it("should sort params for consistent keys", () => {
@@ -83,7 +83,7 @@ describe("CacheKeyGenerator", () => {
 
       const result = service.generatePatternKey(prefix, pattern);
 
-      expect(result).toBe("admin:users:*");
+      expect(result).toBe("v1:admin:users:*");
     });
   });
 
@@ -94,7 +94,7 @@ describe("CacheKeyGenerator", () => {
 
       const result = service.generateSimpleKey(prefix, id);
 
-      expect(result).toBe("admin:user:user-123");
+      expect(result).toBe("v1:admin:user:user-123");
     });
 
     it("should generate simple key with number id", () => {
@@ -103,7 +103,7 @@ describe("CacheKeyGenerator", () => {
 
       const result = service.generateSimpleKey(prefix, id);
 
-      expect(result).toBe("admin:product:456");
+      expect(result).toBe("v1:admin:product:456");
     });
   });
 
@@ -116,7 +116,7 @@ describe("CacheKeyGenerator", () => {
 
       const result = service.generateListKey(prefix, page, limit, filters);
 
-      expect(result).toBe("admin:users:list:limit=20:page=2:status=active");
+      expect(result).toBe("v1:admin:users:list:limit=20:page=2:status=active");
     });
 
     it("should use default values", () => {
@@ -124,7 +124,7 @@ describe("CacheKeyGenerator", () => {
 
       const result = service.generateListKey(prefix);
 
-      expect(result).toBe("admin:users:list:limit=10:page=1");
+      expect(result).toBe("v1:admin:users:list:limit=10:page=1");
     });
   });
 
@@ -143,7 +143,7 @@ describe("CacheKeyGenerator", () => {
       );
 
       expect(result).toBe(
-        "admin:sales:analytics:from=2023-01-01:interval=day:to=2023-01-31",
+        "v1:admin:sales:analytics:from=2023-01-01:interval=day:to=2023-01-31",
       );
     });
 
@@ -152,7 +152,7 @@ describe("CacheKeyGenerator", () => {
 
       const result = service.generateAnalyticsKey(prefix);
 
-      expect(result).toBe("admin:sales:analytics");
+      expect(result).toBe("v1:admin:sales:analytics");
     });
 
     it("should handle partial date range", () => {
@@ -161,7 +161,7 @@ describe("CacheKeyGenerator", () => {
 
       const result = service.generateAnalyticsKey(prefix, dateFrom);
 
-      expect(result).toBe("admin:sales:analytics:from=2023-01-01");
+      expect(result).toBe("v1:admin:sales:analytics:from=2023-01-01");
     });
   });
 });

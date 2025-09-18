@@ -541,13 +541,17 @@ export class ExportResultDto {
 
 export class PaginatedProductsDto {
   @ApiProperty({ type: [ProductDetailsDto] })
-  data: ProductDetailsDto[];
+  products: ProductDetailsDto[];
 
   @ApiProperty()
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    total_pages: number;
-  };
+  total: number;
+
+  @ApiProperty()
+  page: number;
+
+  @ApiProperty()
+  limit: number;
+
+  @ApiProperty()
+  total_pages: number;
 }

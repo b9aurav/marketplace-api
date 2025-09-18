@@ -38,7 +38,7 @@ describe("Cache Integration", () => {
     const key2 = keyGenerator.generateKey("test", { b: 2, a: 1 });
 
     expect(key1).toBe(key2);
-    expect(key1).toBe("test:a=1:b=2");
+    expect(key1).toBe("v1:test:a=1:b=2");
   });
 
   it("should handle cache operations gracefully", async () => {

@@ -133,7 +133,7 @@ export class UserListItemDto {
 
 export class PaginatedUsersDto {
   @ApiProperty({ type: [UserListItemDto] })
-  data: UserListItemDto[];
+  users: UserListItemDto[];
 
   @ApiProperty()
   total: number;

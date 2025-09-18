@@ -11,6 +11,12 @@ import {
   CACHE_PATTERNS,
 } from "../../common/cache/constants/cache.constants";
 import { AdminAuditService } from "./admin-audit.service";
+import { 
+  CacheList, 
+  CacheUser, 
+  CacheAnalytics, 
+  CacheInvalidate 
+} from "../../common/cache/decorators/cache.decorator";
 import {
   GetUsersQueryDto,
   UpdateUserStatusDto,
@@ -21,6 +27,7 @@ import {
   GetUserAnalyticsQueryDto,
   UserStatus,
 } from "../dto/user-management.dto";
+import { OrderStatus } from "../../orders/entities/order.entity";
 
 @Injectable()
 export class UserManagementService {
@@ -36,6 +43,7 @@ export class UserManagementService {
     private auditService: AdminAuditService,
   ) {}
 
+  @CacheList(CACHE_TTL.USER_LIST)
   async getUsers(query: GetUsersQueryDto): Promise<PaginatedUsersDto> {
     const cacheKey = this.cacheKeyGenerator.generateListKey(
       CACHE_KEYS.USER_LIST,
@@ -79,7 +87,7 @@ export class UserManagementService {
     );
 
     const result: PaginatedUsersDto = {
-      data: userDtos,
+      users: userDtos,
       total,
       page: query.page,
       limit: query.limit,
@@ -93,6 +101,7 @@ export class UserManagementService {
     return result;
   }
 
+  @CacheUser(CACHE_TTL.USER_DETAILS)
   async getUserDetails(id: string): Promise<UserDetailsDto> {
     const cacheKey = this.cacheKeyGenerator.generateSimpleKey(
       CACHE_KEYS.USER_DETAILS,
@@ -138,6 +147,7 @@ export class UserManagementService {
     return userDetails;
   }
 
+  @CacheInvalidate([CACHE_PATTERNS.USERS])
   async updateUserStatus(
     id: string,
     updateDto: UpdateUserStatusDto,
@@ -180,6 +190,7 @@ export class UserManagementService {
     );
   }
 
+  @CacheAnalytics(CACHE_TTL.USER_LIST)
   async getUserAnalytics(
     query: GetUserAnalyticsQueryDto,
   ): Promise<UserAnalyticsDto> {
@@ -349,7 +360,7 @@ export class UserManagementService {
       ])
       .where("order.user_id = :userId", { userId })
       .andWhere("order.status IN (:...statuses)", {
-        statuses: ["delivered", "completed"],
+        statuses: [OrderStatus.DELIVERED],
       })
       .getRawOne();
 

@@ -44,7 +44,8 @@ async function testAdminAuth() {
     console.log('2. Testing admin dashboard metrics endpoint...');
     console.log('   Token:', token);
     // http://localhost:3000/api/admin/orders?page=1&limit=10&sort_by=created_at&sort_order=desc
-    const adminResponse = await fetch(`${baseUrl}/api/admin/orders?page=1&limit=10&sort_by=created_at&sort_order=desc`, {
+    // http://localhost:3000/api/admin/users?page=1&pageSize=10&search
+    const adminResponse = await fetch(`${baseUrl}/api/admin/users?page=1&limit=10&search`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

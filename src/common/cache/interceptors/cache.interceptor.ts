@@ -32,7 +32,14 @@ export class CacheInterceptor implements NestInterceptor {
       context.getHandler(),
     );
 
-    if (!cacheOptions) {
+    if (!cacheOptions || cacheOptions.skipCache) {
+      return next.handle();
+    }
+
+    // Check if cache is available
+    const isCacheAvailable = await this.cacheService.isAvailable();
+    if (!isCacheAvailable) {
+      this.logger.warn('Cache is not available, falling back to direct execution');
       return next.handle();
     }
 
@@ -49,7 +56,7 @@ export class CacheInterceptor implements NestInterceptor {
       // Default key generation based on method name and arguments
       const keyPrefix = `${className.toLowerCase()}:${methodName}`;
       const params = this.extractParams(request, args);
-      cacheKey = this.cacheKeyGenerator.generateKey(keyPrefix, params);
+      cacheKey = this.cacheKeyGenerator.generateKey(keyPrefix, params, cacheOptions.version);
     }
 
     // Check cache condition
@@ -77,7 +84,7 @@ export class CacheInterceptor implements NestInterceptor {
       );
     } catch (error) {
       this.logger.error(`Cache error for key ${cacheKey}:`, error);
-      // Fallback to executing the method without caching
+      // Graceful fallback to executing the method without caching
       return next.handle();
     }
   }

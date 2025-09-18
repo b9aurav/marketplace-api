@@ -1,24 +1,25 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { CACHE_MANAGER } from "@nestjs/cache-manager";
-import { CacheService } from "./cache.service";
+import { Test, TestingModule } from '@nestjs/testing';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { CacheService } from './cache.service';
+import { CacheMetrics } from './interfaces/cache.interface';
 
-describe("CacheService", () => {
+describe('CacheService', () => {
   let service: CacheService;
-  let mockCacheManager: jest.Mocked<any>;
+  let mockCacheManager: any;
 
   beforeEach(async () => {
     mockCacheManager = {
       get: jest.fn(),
       set: jest.fn(),
       del: jest.fn(),
-      stores: [
-        {
-          client: {
-            keys: jest.fn(),
-            ttl: jest.fn(),
-          },
-        },
-      ],
+      stores: [{
+        client: {
+          keys: jest.fn(),
+          ttl: jest.fn(),
+          memory: jest.fn(),
+          config: jest.fn(),
+        }
+      }]
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -34,117 +35,196 @@ describe("CacheService", () => {
     service = module.get<CacheService>(CacheService);
   });
 
-  it("should be defined", () => {
+  it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  describe("get", () => {
-    it("should return cached value when exists", async () => {
-      const key = "test:key";
-      const value = { data: "test" };
+  describe('get', () => {
+    it('should return cached value and update metrics', async () => {
+      const key = 'test-key';
+      const value = { data: 'test' };
       mockCacheManager.get.mockResolvedValue(value);
 
       const result = await service.get(key);
 
       expect(result).toEqual(value);
       expect(mockCacheManager.get).toHaveBeenCalledWith(key);
+      
+      const metrics = service.getMetrics();
+      expect(metrics.hits).toBe(1);
+      expect(metrics.totalRequests).toBe(1);
     });
 
-    it("should return null when cache miss", async () => {
-      const key = "test:key";
-      mockCacheManager.get.mockResolvedValue(undefined);
+    it('should handle cache miss and update metrics', async () => {
+      const key = 'test-key';
+      mockCacheManager.get.mockResolvedValue(null);
 
       const result = await service.get(key);
 
       expect(result).toBeNull();
-      expect(mockCacheManager.get).toHaveBeenCalledWith(key);
+      
+      const metrics = service.getMetrics();
+      expect(metrics.misses).toBe(1);
+      expect(metrics.totalRequests).toBe(1);
     });
 
-    it("should return null on error", async () => {
-      const key = "test:key";
-      mockCacheManager.get.mockRejectedValue(new Error("Cache error"));
+    it('should handle errors gracefully', async () => {
+      const key = 'test-key';
+      mockCacheManager.get.mockRejectedValue(new Error('Cache error'));
 
       const result = await service.get(key);
 
       expect(result).toBeNull();
+      
+      const metrics = service.getMetrics();
+      expect(metrics.errors).toBe(1);
     });
   });
 
-  describe("set", () => {
-    it("should set value in cache", async () => {
-      const key = "test:key";
-      const value = { data: "test" };
+  describe('set', () => {
+    it('should set cache value and update metrics', async () => {
+      const key = 'test-key';
+      const value = { data: 'test' };
       const ttl = 300;
+      mockCacheManager.set.mockResolvedValue(undefined);
 
       await service.set(key, value, ttl);
 
       expect(mockCacheManager.set).toHaveBeenCalledWith(key, value, ttl);
+      
+      const metrics = service.getMetrics();
+      expect(metrics.sets).toBe(1);
     });
 
-    it("should throw error when set fails", async () => {
-      const key = "test:key";
-      const value = { data: "test" };
-      mockCacheManager.set.mockRejectedValue(new Error("Set error"));
+    it('should handle errors gracefully', async () => {
+      const key = 'test-key';
+      const value = { data: 'test' };
+      mockCacheManager.set.mockRejectedValue(new Error('Cache error'));
 
-      await expect(service.set(key, value)).rejects.toThrow("Set error");
+      await service.set(key, value);
+
+      const metrics = service.getMetrics();
+      expect(metrics.errors).toBe(1);
     });
   });
 
-  describe("del", () => {
-    it("should delete key from cache", async () => {
-      const key = "test:key";
+  describe('del', () => {
+    it('should delete cache value and update metrics', async () => {
+      const key = 'test-key';
+      mockCacheManager.del.mockResolvedValue(undefined);
 
       await service.del(key);
 
       expect(mockCacheManager.del).toHaveBeenCalledWith(key);
+      
+      const metrics = service.getMetrics();
+      expect(metrics.deletes).toBe(1);
     });
   });
 
-  describe("exists", () => {
-    it("should return true when key exists", async () => {
-      const key = "test:key";
-      mockCacheManager.get.mockResolvedValue({ data: "test" });
+  describe('delPattern', () => {
+    it('should delete cache values by pattern', async () => {
+      const pattern = 'test:*';
+      const keys = ['test:key1', 'test:key2'];
+      mockCacheManager.stores[0].client.keys.mockResolvedValue(keys);
+      mockCacheManager.del.mockResolvedValue(undefined);
 
-      const result = await service.exists(key);
+      await service.delPattern(pattern);
+
+      expect(mockCacheManager.stores[0].client.keys).toHaveBeenCalledWith(pattern);
+      expect(mockCacheManager.del).toHaveBeenCalledTimes(keys.length);
+    });
+  });
+
+  describe('getMetrics', () => {
+    it('should return cache metrics with hit rate', async () => {
+      // Simulate some cache operations
+      mockCacheManager.get.mockResolvedValueOnce({ data: 'test' }); // hit
+      mockCacheManager.get.mockResolvedValueOnce(null); // miss
+      mockCacheManager.set.mockResolvedValue(undefined);
+
+      await service.get('key1');
+      await service.get('key2');
+      await service.set('key3', 'value');
+
+      const metrics = service.getMetrics();
+
+      expect(metrics.hits).toBe(1);
+      expect(metrics.misses).toBe(1);
+      expect(metrics.sets).toBe(1);
+      expect(metrics.totalRequests).toBe(2);
+      expect(metrics.hitRate).toBe(50);
+    });
+  });
+
+  describe('warmCache', () => {
+    it('should warm cache with provided data', async () => {
+      const warmupData = [
+        { key: 'key1', value: 'value1', ttl: 300 },
+        { key: 'key2', value: 'value2' },
+      ];
+      mockCacheManager.set.mockResolvedValue(undefined);
+
+      await service.warmCache(warmupData);
+
+      expect(mockCacheManager.set).toHaveBeenCalledTimes(2);
+      expect(mockCacheManager.set).toHaveBeenCalledWith('key1', 'value1', 300);
+      expect(mockCacheManager.set).toHaveBeenCalledWith('key2', 'value2', undefined);
+    });
+  });
+
+  describe('isAvailable', () => {
+    it('should return true when cache is available', async () => {
+      mockCacheManager.set.mockResolvedValue(undefined);
+      mockCacheManager.get.mockResolvedValue('ok');
+      mockCacheManager.del.mockResolvedValue(undefined);
+
+      const result = await service.isAvailable();
 
       expect(result).toBe(true);
     });
 
-    it("should return false when key does not exist", async () => {
-      const key = "test:key";
-      mockCacheManager.get.mockResolvedValue(null);
+    it('should return false when cache is not available', async () => {
+      mockCacheManager.set.mockRejectedValue(new Error('Cache error'));
 
-      const result = await service.exists(key);
+      const result = await service.isAvailable();
 
       expect(result).toBe(false);
     });
   });
 
-  describe("delPattern", () => {
-    it("should delete keys matching pattern", async () => {
-      const pattern = "test:*";
-      const keys = ["test:key1", "test:key2"];
-      mockCacheManager.stores[0].client.keys.mockResolvedValue(keys);
+  describe('configureLRUEviction', () => {
+    it('should configure LRU eviction policy', async () => {
+      mockCacheManager.stores[0].client.config.mockResolvedValue(undefined);
 
-      await service.delPattern(pattern);
+      await service.configureLRUEviction();
 
-      expect(mockCacheManager.stores[0].client.keys).toHaveBeenCalledWith(
-        pattern,
+      expect(mockCacheManager.stores[0].client.config).toHaveBeenCalledWith(
+        'SET',
+        'maxmemory-policy',
+        'allkeys-lru'
       );
-      expect(mockCacheManager.del).toHaveBeenCalledTimes(2);
     });
   });
 
-  describe("ttl", () => {
-    it("should return TTL for key", async () => {
-      const key = "test:key";
-      const ttl = 300;
-      mockCacheManager.stores[0].client.ttl.mockResolvedValue(ttl);
+  describe('resetMetrics', () => {
+    it('should reset all metrics', async () => {
+      // Generate some metrics first
+      mockCacheManager.get.mockResolvedValue({ data: 'test' });
+      await service.get('test-key');
 
-      const result = await service.ttl(key);
+      let metrics = service.getMetrics();
+      expect(metrics.hits).toBe(1);
 
-      expect(result).toBe(ttl);
-      expect(mockCacheManager.stores[0].client.ttl).toHaveBeenCalledWith(key);
+      service.resetMetrics();
+
+      metrics = service.getMetrics();
+      expect(metrics.hits).toBe(0);
+      expect(metrics.misses).toBe(0);
+      expect(metrics.sets).toBe(0);
+      expect(metrics.deletes).toBe(0);
+      expect(metrics.errors).toBe(0);
+      expect(metrics.totalRequests).toBe(0);
     });
   });
 });

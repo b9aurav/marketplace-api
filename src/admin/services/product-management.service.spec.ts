@@ -168,8 +168,8 @@ describe("ProductManagementService", () => {
 
       const result = await service.getProducts(query);
 
-      expect(result.data).toHaveLength(1);
-      expect(result.pagination.total).toBe(1);
+      expect(result.products).toHaveLength(1);
+      expect(result.total).toBe(1);
       expect(cacheService.set).toHaveBeenCalled();
     });
 

@@ -5,6 +5,11 @@ import { User } from "../../users/entities/user.entity";
 import { Order, OrderStatus } from "../../orders/entities/order.entity";
 import { Product } from "../../products/entities/product.entity";
 import { CacheService } from "../../common/cache/cache.service";
+import { 
+  Cache, 
+  CacheAnalytics 
+} from "../../common/cache/decorators/cache.decorator";
+import { CACHE_TTL } from "../../common/cache/constants/cache.constants";
 import {
   DashboardMetricsDto,
   SalesAnalyticsDto,
@@ -28,6 +33,7 @@ export class DashboardService {
     private cacheService: CacheService,
   ) {}
 
+  @Cache({ ttl: CACHE_TTL.DASHBOARD_METRICS })
   async getDashboardMetrics(
     query: GetDashboardMetricsQueryDto,
   ): Promise<DashboardMetricsDto> {
@@ -84,6 +90,7 @@ export class DashboardService {
     return metrics;
   }
 
+  @CacheAnalytics(CACHE_TTL.SALES_ANALYTICS)
   async getSalesAnalytics(
     query: GetSalesAnalyticsQueryDto,
   ): Promise<SalesAnalyticsDto> {

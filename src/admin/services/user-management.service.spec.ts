@@ -154,7 +154,7 @@ describe("UserManagementService", () => {
       expect(mockQueryBuilder.skip).toHaveBeenCalledWith(0);
       expect(mockQueryBuilder.take).toHaveBeenCalledWith(10);
       expect(cacheService.set).toHaveBeenCalled();
-      expect(result.data).toHaveLength(1);
+      expect(result.users).toHaveLength(1);
       expect(result.total).toBe(1);
     });
 

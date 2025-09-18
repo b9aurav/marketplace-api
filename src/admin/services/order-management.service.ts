@@ -17,7 +17,12 @@ import {
   CACHE_KEYS,
   CACHE_PATTERNS,
 } from "../../common/cache/constants/cache.constants";
-import { CacheInvalidate } from "../../common/cache/decorators/cache.decorator";
+import { 
+  CacheInvalidate, 
+  CacheList, 
+  Cache, 
+  CacheAnalytics 
+} from "../../common/cache/decorators/cache.decorator";
 import {
   GetOrdersQueryDto,
   UpdateOrderStatusDto,
@@ -47,6 +52,7 @@ export class OrderManagementService {
     private cacheKeyGenerator: CacheKeyGenerator,
   ) {}
 
+  @CacheList(CACHE_TTL.ORDER_LIST)
   async getOrders(query: GetOrdersQueryDto): Promise<PaginatedOrdersDto> {
     const cacheKey = this.cacheKeyGenerator.generateListKey(
       CACHE_KEYS.ORDER_LIST,
@@ -108,6 +114,7 @@ export class OrderManagementService {
     return result;
   }
 
+  @Cache({ ttl: CACHE_TTL.ORDER_LIST, keyGenerator: (args) => `order:${args[0]}` })
   async getOrderDetails(id: string): Promise<OrderDetailsDto> {
     const cacheKey = this.cacheKeyGenerator.generateSimpleKey(
       CACHE_KEYS.ORDER_DETAILS,
@@ -251,6 +258,7 @@ export class OrderManagementService {
     }
   }
 
+  @CacheAnalytics(CACHE_TTL.ORDER_ANALYTICS)
   async getOrderAnalytics(
     query: OrderAnalyticsQueryDto,
   ): Promise<OrderAnalyticsDto> {

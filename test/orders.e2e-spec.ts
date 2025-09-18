@@ -239,7 +239,7 @@ describe("OrdersController (e2e)", () => {
     it("should create a new order", async () => {
       // Insert a real category into the test database using the API
       const categoryResponse = await request(app.getHttpServer())
-        .post("/admin/products/categories")
+        .post("/admin/categories")
         .set("Authorization", `Bearer ${mockJwtToken}`)
         .send({
           name: "Test Category",
