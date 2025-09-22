@@ -3,6 +3,7 @@ import { FileUploadType } from "../../common/entities/file-upload.entity";
 import {
   UploadImageDto,
   FileUploadResponseDto,
+  FileUploadDetailedResponseDto,
   GetFilesQueryDto,
 } from "../dto/file-upload.dto";
 import { User } from "../../users/entities/user.entity";
@@ -39,13 +40,20 @@ describe("FileUploadController Logic", () => {
   };
 
   const mockFileUploadResponse: FileUploadResponseDto = {
+    filename: "test-filename.jpg",
+    url: "http://localhost:3000/uploads/test-filename.jpg",
+    mime_type: "image/jpeg",
+    size: 1024 * 1024,
+  };
+
+  const mockFileUploadDetailedResponse: FileUploadDetailedResponseDto = {
     id: "file-id",
     filename: "test-filename.jpg",
     original_name: "test-image.jpg",
     url: "http://localhost:3000/uploads/test-filename.jpg",
     mime_type: "image/jpeg",
     size: 1024 * 1024,
-    type: FileUploadType.GENERAL,
+    type: FileUploadType.PRODUCT,
     created_at: new Date(),
   };
 
@@ -125,7 +133,7 @@ describe("FileUploadController Logic", () => {
       };
 
       const mockResponse = {
-        data: [mockFileUploadResponse],
+        data: [mockFileUploadDetailedResponse],
         total: 1,
         page: 1,
         limit: 10,
@@ -150,7 +158,7 @@ describe("FileUploadController Logic", () => {
       };
 
       const mockResponse = {
-        data: [mockFileUploadResponse],
+        data: [mockFileUploadDetailedResponse],
         total: 1,
         page: 1,
         limit: 10,
@@ -168,7 +176,7 @@ describe("FileUploadController Logic", () => {
 
   describe("getFileById", () => {
     it("should return file details", async () => {
-      fileUploadService.getFileById.mockResolvedValue(mockFileUploadResponse);
+      fileUploadService.getFileById.mockResolvedValue(mockFileUploadDetailedResponse);
 
       const result = await fileUploadService.getFileById("file-id");
 

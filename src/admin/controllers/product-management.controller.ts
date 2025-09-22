@@ -13,6 +13,7 @@ import {
   ParseUUIDPipe,
   HttpStatus,
   HttpCode,
+  ValidationPipe,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -47,7 +48,7 @@ import {
 export class ProductManagementController {
   constructor(
     private readonly productManagementService: ProductManagementService,
-  ) {}
+  ) { }
 
   @Get()
   @ApiOperation({
@@ -152,7 +153,14 @@ export class ProductManagementController {
   })
   @ApiResponse({ status: 409, description: "Conflict - SKU already exists" })
   async createProduct(
-    @Body() data: AdminCreateProductDto,
+    @Body(new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: false,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    })) data: AdminCreateProductDto,
   ): Promise<ProductDetailsDto> {
     return this.productManagementService.createProduct(data);
   }
@@ -274,6 +282,6 @@ export class ProductManagementController {
   async exportProducts(
     @Body() data: ExportProductsDto,
   ): Promise<ExportResultDto> {
-    return this.productManagementService.exportProducts();
+    return this.productManagementService.exportProducts(data);
   }
 }

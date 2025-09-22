@@ -14,7 +14,7 @@ import {
 import { DashboardService } from "../services/dashboard.service";
 import { AdminGuard } from "../guards/admin.guard";
 import { AdminAuditInterceptor } from "../interceptors/admin-audit.interceptor";
-import { SupabaseAuthGuard } from "../../auth/guards/supabase-auth.guard"; // Import SupabaseAuthGuard
+import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
 import {
   DashboardMetricsDto,
   SalesAnalyticsDto,
@@ -25,7 +25,7 @@ import {
 @ApiTags("Admin Dashboard")
 @ApiBearerAuth()
 @Controller("admin/dashboard")
-@UseGuards(SupabaseAuthGuard, AdminGuard) // Use SupabaseAuthGuard
+@UseGuards(JwtAuthGuard, AdminGuard)
 @UseInterceptors(AdminAuditInterceptor)
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}

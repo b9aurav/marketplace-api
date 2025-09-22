@@ -5,9 +5,9 @@ import { User } from "../../users/entities/user.entity";
 import { Order, OrderStatus } from "../../orders/entities/order.entity";
 import { Product } from "../../products/entities/product.entity";
 import { CacheService } from "../../common/cache/cache.service";
-import { 
-  Cache, 
-  CacheAnalytics 
+import {
+  Cache,
+  CacheAnalytics
 } from "../../common/cache/decorators/cache.decorator";
 import { CACHE_TTL } from "../../common/cache/constants/cache.constants";
 import {
@@ -31,7 +31,7 @@ export class DashboardService {
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
     private cacheService: CacheService,
-  ) {}
+  ) { }
 
   @Cache({ ttl: CACHE_TTL.DASHBOARD_METRICS })
   async getDashboardMetrics(
@@ -128,10 +128,7 @@ export class DashboardService {
       previousDateTo,
     );
 
-    // Find peak sales day
-    const peakSalesDay = salesTrend.reduce((peak, current) =>
-      current.revenue > peak.revenue ? current : peak,
-    );
+    // Peak sales day calculation removed as it's not in the DTO
 
     const analytics: SalesAnalyticsDto = {
       sales_trend: salesTrend,
@@ -141,12 +138,6 @@ export class DashboardService {
         totalMetrics.totalRevenue,
         previousMetrics.totalRevenue,
       ),
-      average_order_value:
-        totalMetrics.totalOrders > 0
-          ? totalMetrics.totalRevenue / totalMetrics.totalOrders
-          : 0,
-      peak_sales_day: peakSalesDay.date,
-      peak_sales_amount: peakSalesDay.revenue,
     };
 
     // Cache the result
@@ -321,35 +312,17 @@ export class DashboardService {
     };
   }
 
-  private getDateFormat(interval: string): string {
-    switch (interval) {
-      case "week":
-        return 'YYYY-"W"WW';
-      case "month":
-        return "YYYY-MM";
-      default:
-        return "YYYY-MM-DD";
-    }
-  }
+
 
   private getDateGroupBy(interval: string): string {
-    // Determine database type (e.g., from TypeORM connection options or environment)
-    // For simplicity, assuming SQLite for testing if not explicitly PostgreSQL
-    const dbType = process.env.DATABASE_TYPE || "sqlite"; // Or get from TypeORM config
-
+    // Use PostgreSQL syntax by default since that's what we're using
     switch (interval) {
       case "week":
-        return dbType === "postgres"
-          ? "TO_CHAR(order.created_at, 'YYYY-\"W\"WW')"
-          : "STRFTIME('%Y-W%W', order.created_at)";
+        return "TO_CHAR(order.created_at, 'YYYY-\"W\"WW')";
       case "month":
-        return dbType === "postgres"
-          ? "TO_CHAR(order.created_at, 'YYYY-MM')"
-          : "STRFTIME('%Y-%m', order.created_at)";
+        return "TO_CHAR(order.created_at, 'YYYY-MM')";
       default:
-        return dbType === "postgres"
-          ? "TO_CHAR(order.created_at, 'YYYY-MM-DD')"
-          : "STRFTIME('%Y-%m-%d', order.created_at)";
+        return "TO_CHAR(order.created_at, 'YYYY-MM-DD')";
     }
   }
 

@@ -67,7 +67,7 @@ class TestProductManagementController {
   }
 
   async exportProducts(data: ExportProductsDto) {
-    return this.productManagementService.exportProducts();
+    return this.productManagementService.exportProducts(data);
   }
 }
 
@@ -89,16 +89,13 @@ describe("ProductManagementController", () => {
     status: ProductStatus.ACTIVE,
     featured: false,
     tags: ["test"],
-    meta_title: "Test Meta Title",
-    meta_description: "Test Meta Description",
-    minimum_stock: 5,
-    sales_count: 0,
     category_id: "cat-123",
+    category: {
+      id: "cat-123",
+      name: "Test Category",
+    },
     created_at: new Date(),
     updated_at: new Date(),
-    low_stock: false,
-    category_name: "Test Category",
-    total_reviews: 0,
   };
 
   const mockPaginatedProducts: PaginatedProductsDto = {

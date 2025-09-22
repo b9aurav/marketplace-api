@@ -17,11 +17,11 @@ import {
   CACHE_KEYS,
   CACHE_PATTERNS,
 } from "../../common/cache/constants/cache.constants";
-import { 
-  CacheInvalidate, 
-  CacheList, 
-  Cache, 
-  CacheAnalytics 
+import {
+  CacheInvalidate,
+  CacheList,
+  Cache,
+  CacheAnalytics
 } from "../../common/cache/decorators/cache.decorator";
 import {
   GetOrdersQueryDto,
@@ -50,7 +50,7 @@ export class OrderManagementService {
     private addressRepository: Repository<Address>,
     private cacheService: CacheService,
     private cacheKeyGenerator: CacheKeyGenerator,
-  ) {}
+  ) { }
 
   @CacheList(CACHE_TTL.ORDER_LIST)
   async getOrders(query: GetOrdersQueryDto): Promise<PaginatedOrdersDto> {
@@ -392,14 +392,11 @@ export class OrderManagementService {
       id: order.id,
       status: order.status,
       total: Number(order.total),
-      fees: Number(order.fees),
-      net_amount: Number(order.net_amount),
       tracking_number: order.tracking_number,
+      user_id: order.user_id,
+      address_id: order.address_id,
       payment_method: order.payment_method,
       transaction_id: order.transaction_id,
-      payment_method_details: order.payment_method_details,
-      admin_notes: order.admin_notes,
-      shipping_details: order.shipping_details,
       coupon_code: order.coupon_code,
       discount_amount: Number(order.discount_amount),
       created_at: order.created_at,
@@ -412,13 +409,11 @@ export class OrderManagementService {
       },
       address: order.address
         ? {
-            id: order.address.id,
-            street: order.address.street,
-            city: order.address.city,
-            state: order.address.state,
-            postal_code: order.address.zip,
-            country: "US", // Default country since it's not in the entity
-          }
+          street: order.address.street,
+          city: order.address.city,
+          state: order.address.state,
+          zip: order.address.zip,
+        }
         : null,
       items:
         order.items?.map((item) => ({
@@ -430,11 +425,11 @@ export class OrderManagementService {
           total: Number(item.price) * item.quantity,
           product: item.product
             ? {
-                id: item.product.id,
-                name: item.product.name,
-                images: item.product.images,
-                sku: item.product.sku,
-              }
+              id: item.product.id,
+              name: item.product.name,
+              images: item.product.images,
+              sku: item.product.sku,
+            }
             : undefined,
         })) || [],
     };

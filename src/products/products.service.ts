@@ -32,11 +32,13 @@ export class ProductsService {
       limit = 20,
     } = findProductsDto;
 
-    const queryBuilder = this.productsRepository.createQueryBuilder("product");
+    const queryBuilder = this.productsRepository
+      .createQueryBuilder("product")
+      .leftJoinAndSelect("product.category", "category");
 
     // Apply filters
     if (category) {
-      queryBuilder.andWhere("product.category_id = :category", { category });
+      queryBuilder.andWhere("category.name = :category", { category });
     }
 
     if (min_price) {

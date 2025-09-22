@@ -31,6 +31,28 @@ export class DeleteImageDto {
 
 export class FileUploadResponseDto {
   @ApiProperty({
+    description: "Public URL of the uploaded file",
+  })
+  url: string;
+
+  @ApiProperty({
+    description: "Generated filename",
+  })
+  filename: string;
+
+  @ApiProperty({
+    description: "File size in bytes",
+  })
+  size: number;
+
+  @ApiProperty({
+    description: "MIME type of the file",
+  })
+  mime_type: string;
+}
+
+export class FileUploadDetailedResponseDto {
+  @ApiProperty({
     description: "Unique identifier of the uploaded file",
     format: "uuid",
   })
@@ -118,9 +140,9 @@ export class GetFilesQueryDto {
 export class PaginatedFilesResponseDto {
   @ApiProperty({
     description: "Array of file upload records",
-    type: [FileUploadResponseDto],
+    type: [FileUploadDetailedResponseDto],
   })
-  data: FileUploadResponseDto[];
+  data: FileUploadDetailedResponseDto[];
 
   @ApiProperty({
     description: "Total number of files",

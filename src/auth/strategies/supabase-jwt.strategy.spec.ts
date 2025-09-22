@@ -123,7 +123,7 @@ describe("SupabaseJwtStrategy", () => {
       mockUsersService.findOne.mockResolvedValue(null);
 
       await expect(strategy.validate(payload)).rejects.toThrow(
-        "Invalid token or user not found",
+        "User not found in database",
       );
       expect(usersService.findOne).toHaveBeenCalledWith("non-existent-user");
     });

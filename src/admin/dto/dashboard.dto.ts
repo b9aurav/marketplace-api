@@ -1,5 +1,6 @@
 import { IsOptional, IsDateString, IsEnum } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { Transform } from "class-transformer";
 
 export class GetDashboardMetricsQueryDto {
   @ApiPropertyOptional({
@@ -8,6 +9,7 @@ export class GetDashboardMetricsQueryDto {
   })
   @IsOptional()
   @IsDateString()
+  @Transform(({ value }) => (value === "undefined" ? undefined : value))
   date_from?: string;
 
   @ApiPropertyOptional({
@@ -16,6 +18,7 @@ export class GetDashboardMetricsQueryDto {
   })
   @IsOptional()
   @IsDateString()
+  @Transform(({ value }) => (value === "undefined" ? undefined : value))
   date_to?: string;
 }
 
@@ -105,13 +108,4 @@ export class SalesAnalyticsDto {
 
   @ApiProperty({ description: "Growth rate compared to previous period" })
   growth_rate: number;
-
-  @ApiProperty({ description: "Average order value for the period" })
-  average_order_value: number;
-
-  @ApiProperty({ description: "Peak sales day" })
-  peak_sales_day: string;
-
-  @ApiProperty({ description: "Peak sales amount" })
-  peak_sales_amount: number;
 }

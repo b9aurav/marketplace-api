@@ -236,7 +236,8 @@ describe("ProductManagementService", () => {
       const result = await service.getProductDetails(productId);
 
       expect(result.id).toBe(productId);
-      expect(result.low_stock).toBe(false); // stock (10) > minimum_stock (5), so false
+      expect(result.category).toBeDefined();
+      expect(result.category.id).toBe(mockProduct.category_id);
       expect(cacheService.set).toHaveBeenCalled();
     });
 

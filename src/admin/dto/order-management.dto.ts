@@ -212,9 +212,6 @@ export class OrderUserDto {
 
 export class OrderAddressDto {
   @ApiProperty()
-  id: string;
-
-  @ApiProperty()
   street: string;
 
   @ApiProperty()
@@ -224,27 +221,30 @@ export class OrderAddressDto {
   state: string;
 
   @ApiProperty()
-  postal_code: string;
-
-  @ApiProperty()
-  country: string;
+  zip: string;
 }
 
 export class OrderDto {
   @ApiProperty()
   id: string;
 
+  @ApiProperty()
+  user_id: string;
+
+  @ApiProperty({ type: OrderUserDto })
+  user: OrderUserDto;
+
+  @ApiProperty()
+  address_id: string;
+
+  @ApiProperty({ type: OrderAddressDto })
+  address: OrderAddressDto;
+
   @ApiProperty({ enum: OrderStatus })
   status: OrderStatus;
 
   @ApiProperty()
   total: number;
-
-  @ApiProperty()
-  fees: number;
-
-  @ApiProperty()
-  net_amount: number;
 
   @ApiProperty({ required: false })
   tracking_number?: string;
@@ -256,34 +256,19 @@ export class OrderDto {
   transaction_id?: string;
 
   @ApiProperty({ required: false })
-  payment_method_details?: Record<string, any>;
-
-  @ApiProperty({ required: false })
-  admin_notes?: string;
-
-  @ApiProperty({ required: false })
-  shipping_details?: Record<string, any>;
-
-  @ApiProperty({ required: false })
   coupon_code?: string;
 
   @ApiProperty()
   discount_amount: number;
+
+  @ApiProperty({ type: [OrderItemDto] })
+  items: OrderItemDto[];
 
   @ApiProperty()
   created_at: Date;
 
   @ApiProperty()
   updated_at: Date;
-
-  @ApiProperty({ type: OrderUserDto })
-  user: OrderUserDto;
-
-  @ApiProperty({ type: OrderAddressDto })
-  address: OrderAddressDto;
-
-  @ApiProperty({ type: [OrderItemDto] })
-  items: OrderItemDto[];
 }
 
 export class PaginatedOrdersDto {

@@ -43,6 +43,12 @@ export class UsersService {
     userId: string,
     createAddressDto: CreateAddressDto,
   ): Promise<Address> {
+    // Check if user exists
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
     // If this is a default address, unset any existing default
     if (createAddressDto.is_default) {
       await this.addressRepository.update(

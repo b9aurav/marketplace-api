@@ -15,6 +15,7 @@ import { AdminAuditService } from "./admin-audit.service";
 import {
   UploadImageDto,
   FileUploadResponseDto,
+  FileUploadDetailedResponseDto,
   GetFilesQueryDto,
   PaginatedFilesResponseDto,
 } from "../dto/file-upload.dto";
@@ -228,7 +229,7 @@ export class FileUploadService {
     const [files, total] = await queryBuilder.getManyAndCount();
 
     const result: PaginatedFilesResponseDto = {
-      data: files.map((file) => this.mapToResponseDto(file)),
+      data: files.map((file) => this.mapToDetailedResponseDto(file)),
       total,
       page,
       limit,
@@ -241,11 +242,11 @@ export class FileUploadService {
     return result;
   }
 
-  async getFileById(id: string): Promise<FileUploadResponseDto> {
+  async getFileById(id: string): Promise<FileUploadDetailedResponseDto> {
     const cacheKey = `admin:files:details:${id}`;
 
     // Try to get from cache first
-    const cached = await this.cacheService.get<FileUploadResponseDto>(cacheKey);
+    const cached = await this.cacheService.get<FileUploadDetailedResponseDto>(cacheKey);
     if (cached) {
       return cached;
     }
@@ -258,7 +259,7 @@ export class FileUploadService {
       throw new NotFoundException(`File with ID ${id} not found`);
     }
 
-    const result = this.mapToResponseDto(file);
+    const result = this.mapToDetailedResponseDto(file);
 
     // Cache the result for 30 minutes
     await this.cacheService.set(cacheKey, result, 30 * 60);
@@ -343,6 +344,15 @@ export class FileUploadService {
   }
 
   private mapToResponseDto(file: FileUpload): FileUploadResponseDto {
+    return {
+      url: file.url,
+      filename: file.filename,
+      size: file.size,
+      mime_type: file.mime_type,
+    };
+  }
+
+  private mapToDetailedResponseDto(file: FileUpload): FileUploadDetailedResponseDto {
     return {
       id: file.id,
       filename: file.filename,

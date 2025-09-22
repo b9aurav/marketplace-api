@@ -133,13 +133,14 @@ describe("AuthService", () => {
     };
 
     const mockSession = {
-      token: "access-token",
+      access_token: "access-token",
     };
 
     const mockDbUser = {
       id: "user-id",
       email: "user@example.com",
       name: "Test User",
+      role: "user",
     };
 
     it("should login user successfully", async () => {
@@ -154,11 +155,12 @@ describe("AuthService", () => {
 
       expect(result).toEqual({
         message: "Login successful",
-        token: mockSession.token,
+        token: mockSession.access_token,
         user: {
           id: mockDbUser.id,
           email: mockDbUser.email,
           name: mockDbUser.name,
+          role: mockDbUser.role,
         },
       });
 

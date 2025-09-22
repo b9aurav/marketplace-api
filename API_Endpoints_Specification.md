@@ -308,9 +308,7 @@ POST /api/admin/products
   },
   "status": "active",
   "featured": true,
-  "tags": ["tag1", "tag2"],
-  "meta_title": "SEO Title",
-  "meta_description": "SEO Description"
+  "tags": ["tag1", "tag2"]
 }
 ```
 
@@ -453,7 +451,6 @@ GET /api/admin/categories
       "id": "uuid",
       "name": "Electronics",
       "description": "Electronic devices",
-      "image": "url",
       "parent_id": null,
       "slug": "electronics",
       "sort_order": 1,
@@ -513,7 +510,6 @@ POST /api/admin/categories
   "name": "Category Name",
   "description": "Category description",
   "parent_id": "uuid",
-  "image": "url",
   "sort_order": 1,
   "status": "active"
 }
@@ -584,6 +580,8 @@ GET /api/admin/orders
       },
       "status": "delivered",
       "total": 123.45,
+      "user_id": "uuid",
+      "address_id": "uuid",
       "tracking_number": "TRK123456",
       "payment_method": "credit_card",
       "transaction_id": "txn_123",
@@ -595,7 +593,8 @@ GET /api/admin/orders
           "product_id": "uuid",
           "product_name": "Product Name",
           "quantity": 2,
-          "price": 55.55
+          "price": 55.55,
+          "total": 111.10
         }
       ],
       "created_at": "2024-01-01T00:00:00Z",
@@ -697,352 +696,13 @@ GET /api/admin/orders/analytics
 }
 ```
 
-### 5.6 Export Orders
-```http
-POST /api/admin/orders/export
-```
-**Description**: Export orders data
-**Auth**: Admin required
 
-**Request Body**:
-```json
-{
-  "filters": {
-    "date_from": "2024-01-01",
-    "date_to": "2024-01-31",
-    "status": "delivered"
-  },
-  "format": "csv",
-  "fields": ["id", "user.name", "user.email", "status", "total", "created_at", "items"]
-}
-```
 
 ---
 
-## 6. Payment & Transaction Management
+## 6. File Upload & Management
 
-### 6.1 Get Transactions
-```http
-GET /api/admin/transactions
-```
-**Description**: Get list of payment transactions
-**Auth**: Admin required
-**Query Parameters**:
-- `page` (optional): Page number
-- `limit` (optional): Items per page
-- `status` (optional): Filter by transaction status
-- `payment_method` (optional): Filter by payment method
-- `date_from` (optional): Transaction date filter
-- `date_to` (optional): Transaction date filter
-- `min_amount` (optional): Minimum amount filter
-- `max_amount` (optional): Maximum amount filter
-
-**Response**:
-```json
-{
-  "transactions": [
-    {
-      "id": "uuid",
-      "order_id": "uuid",
-      "user_id": "uuid",
-      "amount": 123.45,
-      "currency": "USD",
-      "status": "completed",
-      "payment_method": "credit_card",
-      "payment_method_details": {
-        "brand": "visa",
-        "last4": "4242"
-      },
-      "transaction_id": "txn_123",
-      "gateway": "stripe",
-      "gateway_transaction_id": "pi_123",
-      "fees": 3.50,
-      "net_amount": 119.95,
-      "created_at": "2024-01-01T00:00:00Z",
-      "updated_at": "2024-01-01T00:00:00Z"
-    }
-  ],
-  "total": 1234,
-  "page": 1,
-  "limit": 10,
-  "total_pages": 124
-}
-```
-
-### 6.2 Get Transaction Details
-```http
-GET /api/admin/transactions/{id}
-```
-**Description**: Get detailed transaction information
-**Auth**: Admin required
-
-### 6.3 Process Refund
-```http
-POST /api/admin/transactions/{id}/refund
-```
-**Description**: Process transaction refund
-**Auth**: Admin required
-
-**Request Body**:
-```json
-{
-  "amount": 123.45,
-  "reason": "Customer request"
-}
-```
-
-### 6.4 Payment Analytics
-```http
-GET /api/admin/payments/analytics
-```
-**Description**: Get payment and revenue analytics
-**Auth**: Admin required
-**Query Parameters**:
-- `date_from` (optional): Start date
-- `date_to` (optional): End date
-
-**Response**:
-```json
-{
-  "total_revenue": 45678.90,
-  "total_transactions": 1234,
-  "successful_transactions": 1200,
-  "failed_transactions": 34,
-  "success_rate": 97.2,
-  "average_transaction_value": 37.01,
-  "revenue_trend": [
-    {
-      "date": "2024-01-01",
-      "revenue": 2345.67,
-      "transactions": 45
-    }
-  ],
-  "payment_method_distribution": [
-    {
-      "method": "credit_card",
-      "count": 800,
-      "percentage": 66.7,
-      "revenue": 30000.00
-    }
-  ],
-  "failed_payments": [
-    {
-      "id": "uuid",
-      "amount": 123.45,
-      "reason": "insufficient_funds",
-      "created_at": "2024-01-01T00:00:00Z"
-    }
-  ]
-}
-```
-
----
-
-## 7. System Configuration
-
-### 7.1 Get System Settings
-```http
-GET /api/admin/settings
-```
-**Description**: Get system configuration settings
-**Auth**: Admin required
-
-**Response**:
-```json
-{
-  "site_name": "Marketplace",
-  "site_description": "E-commerce marketplace",
-  "currency": "USD",
-  "tax_rate": 8.5,
-  "shipping_cost": 9.99,
-  "free_shipping_threshold": 50.00,
-  "low_stock_threshold": 10,
-  "email_notifications": true,
-  "sms_notifications": false,
-  "maintenance_mode": false
-}
-```
-
-### 7.2 Update System Settings
-```http
-PUT /api/admin/settings
-```
-**Description**: Update system configuration
-**Auth**: Admin required
-
-**Request Body**: Same as get settings response
-
-### 7.3 Get Coupon Codes
-```http
-GET /api/admin/coupons
-```
-**Description**: Get list of coupon codes
-**Auth**: Admin required
-
-**Response**:
-```json
-{
-  "coupons": [
-    {
-      "id": "uuid",
-      "code": "SAVE10",
-      "type": "percentage",
-      "value": 10.0,
-      "minimum_amount": 50.00,
-      "maximum_discount": 20.00,
-      "usage_limit": 100,
-      "used_count": 45,
-      "expires_at": "2024-12-31T23:59:59Z",
-      "is_active": true,
-      "created_at": "2024-01-01T00:00:00Z"
-    }
-  ]
-}
-```
-
-### 7.4 Create Coupon Code
-```http
-POST /api/admin/coupons
-```
-**Description**: Create new coupon code
-**Auth**: Admin required
-
-**Request Body**:
-```json
-{
-  "code": "SAVE10",
-  "type": "percentage",
-  "value": 10.0,
-  "minimum_amount": 50.00,
-  "maximum_discount": 20.00,
-  "usage_limit": 100,
-  "expires_at": "2024-12-31T23:59:59Z",
-  "is_active": true
-}
-```
-
----
-
-## 8. Reports & Analytics
-
-### 8.1 Generate Report
-```http
-POST /api/admin/reports/generate
-```
-**Description**: Generate custom reports
-**Auth**: Admin required
-
-**Request Body**:
-```json
-{
-  "report_type": "sales", // sales, users, products, orders
-  "date_from": "2024-01-01",
-  "date_to": "2024-01-31",
-  "format": "csv", // csv, pdf, xlsx
-  "filters": {
-    "category_id": "uuid",
-    "status": "active"
-  },
-  "fields": ["name", "revenue", "orders"]
-}
-```
-
-**Response**:
-```json
-{
-  "report_id": "uuid",
-  "download_url": "https://example.com/reports/sales-report.csv",
-  "status": "completed",
-  "created_at": "2024-01-01T00:00:00Z"
-}
-```
-
-### 8.2 Get Report Status
-```http
-GET /api/admin/reports/{id}/status
-```
-**Description**: Check report generation status
-**Auth**: Admin required
-
----
-
-## 9. Notifications & Alerts
-
-### 9.1 Get Notifications
-```http
-GET /api/admin/notifications
-```
-**Description**: Get admin notifications
-**Auth**: Admin required
-**Query Parameters**:
-- `page` (optional): Page number
-- `limit` (optional): Items per page
-- `type` (optional): Filter by notification type
-- `read` (optional): Filter by read status
-
-**Response**:
-```json
-{
-  "notifications": [
-    {
-      "id": "uuid",
-      "type": "low_stock",
-      "title": "Low Stock Alert",
-      "message": "Product XYZ is running low on stock",
-      "data": {
-        "product_id": "uuid",
-        "current_stock": 5
-      },
-      "read": false,
-      "created_at": "2024-01-01T00:00:00Z"
-    }
-  ],
-  "total": 45,
-  "unread_count": 12
-}
-```
-
-### 9.2 Mark Notification as Read
-```http
-PATCH /api/admin/notifications/{id}/read
-```
-**Description**: Mark notification as read
-**Auth**: Admin required
-
-### 9.3 Get System Alerts
-```http
-GET /api/admin/alerts
-```
-**Description**: Get system alerts and warnings
-**Auth**: Admin required
-
-**Response**:
-```json
-{
-  "alerts": [
-    {
-      "type": "low_stock",
-      "severity": "warning",
-      "message": "5 products are running low on stock",
-      "count": 5,
-      "action_url": "/products?stock_status=low_stock"
-    },
-    {
-      "type": "failed_payments",
-      "severity": "error",
-      "message": "12 payments failed in the last 24 hours",
-      "count": 12,
-      "action_url": "/transactions?status=failed"
-    }
-  ]
-}
-```
-
----
-
-## 10. File Upload & Management
-
-### 10.1 Upload Image
+### 6.1 Upload Image
 ```http
 POST /api/admin/upload/image
 ```
@@ -1066,17 +726,73 @@ type: product | category | general
 }
 ```
 
-### 10.2 Delete Image
+### 6.2 Get Files List
 ```http
-DELETE /api/admin/upload/image
+GET /api/admin/upload/files
+```
+**Description**: Get paginated list of uploaded files
+**Auth**: Admin required
+**Query Parameters**:
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 10)
+- `type` (optional): Filter by file type
+- `search` (optional): Search by filename
+- `uploaded_by` (optional): Filter by uploader ID
+
+**Response**:
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "filename": "product-123.jpg",
+      "original_name": "original-image.jpg",
+      "url": "https://example.com/images/product-123.jpg",
+      "mime_type": "image/jpeg",
+      "size": 1024000,
+      "type": "product",
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "total": 50,
+  "page": 1,
+  "limit": 10,
+  "total_pages": 5
+}
+```
+
+### 6.3 Get File Details
+```http
+GET /api/admin/upload/files/{id}
+```
+**Description**: Get detailed file information
+**Auth**: Admin required
+
+**Response**:
+```json
+{
+  "id": "uuid",
+  "filename": "product-123.jpg",
+  "original_name": "original-image.jpg",
+  "url": "https://example.com/images/product-123.jpg",
+  "mime_type": "image/jpeg",
+  "size": 1024000,
+  "type": "product",
+  "created_at": "2024-01-01T00:00:00Z"
+}
+```
+
+### 6.4 Delete Image
+```http
+DELETE /api/admin/upload/image/{id}
 ```
 **Description**: Delete uploaded image
 **Auth**: Admin required
 
-**Request Body**:
+**Response**:
 ```json
 {
-  "url": "https://example.com/images/product-123.jpg"
+  "message": "File deleted successfully"
 }
 ```
 
@@ -1124,33 +840,6 @@ All admin endpoints are subject to rate limiting:
 
 ---
 
-## WebSocket Events (Real-time Updates)
 
-### Connection
-```
-ws://localhost:3000/admin/ws
-```
-
-### Events
-- `order.created`: New order notification
-- `order.status_changed`: Order status update
-- `product.low_stock`: Low stock alert
-- `user.registered`: New user registration
-- `payment.failed`: Payment failure notification
-
-### Event Format
-```json
-{
-  "event": "order.created",
-  "data": {
-    "order_id": "uuid",
-    "customer_name": "John Doe",
-    "total": 123.45
-  },
-  "timestamp": "2024-01-01T00:00:00Z"
-}
-```
-
----
 
 This specification covers all the API endpoints required for the Marketplace Admin Frontend based on the implemented features and requirements. Each endpoint includes proper authentication, request/response formats, and error handling.

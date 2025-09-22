@@ -41,8 +41,7 @@ describe("UserManagementController", () => {
         name: "Test User",
         phone: "+1234567890",
         role: Role.USER,
-        is_active: true,
-        last_login_at: new Date(),
+        status: UserStatus.ACTIVE,
         created_at: new Date(),
         updated_at: new Date(),
         order_count: 5,
@@ -61,40 +60,35 @@ describe("UserManagementController", () => {
     name: "Test User",
     phone: "+1234567890",
     role: Role.USER,
-    is_active: true,
-    last_login_at: new Date(),
+    status: UserStatus.ACTIVE,
     created_at: new Date(),
     updated_at: new Date(),
     order_count: 5,
     total_spent: 250.0,
-    metadata: {},
     addresses: [],
-    recent_orders: [],
-    total_orders: 5,
-    average_order_value: 50.0,
-    first_order_date: new Date(),
-    last_order_date: new Date(),
+    order_history: [],
+    statistics: {
+      total_orders: 5,
+      total_spent: 250.0,
+      average_order_value: 50.0,
+      last_order_date: new Date(),
+    },
   };
 
   const mockUserAnalytics: UserAnalyticsDto = {
     total_users: 100,
+    new_registrations: 5,
     active_users: 80,
-    inactive_users: 20,
     blocked_users: 0,
-    new_users_today: 5,
-    new_users_this_week: 25,
-    new_users_this_month: 100,
     registration_trend: [
       { date: "2023-01-01", count: 10 },
       { date: "2023-01-02", count: 15 },
     ],
-    role_distribution: [
-      { role: "user", count: 80, percentage: 80 },
-      { role: "admin", count: 20, percentage: 20 },
-    ],
-    activity_metrics: [
-      { period: "2023-01", active_users: 50, login_count: 200 },
-    ],
+    user_activity: {
+      daily_active: 50,
+      weekly_active: 60,
+      monthly_active: 80,
+    },
   };
 
   beforeEach(async () => {

@@ -34,7 +34,7 @@ import {
 } from "../dto/order-management.dto";
 
 @ApiTags("Admin - Order Management")
-@Controller("api/admin/orders")
+@Controller("admin/orders")
 @UseGuards(JwtAuthGuard, AdminGuard)
 @UseInterceptors(AdminAuditInterceptor)
 @ApiBearerAuth()
@@ -216,7 +216,7 @@ export class OrderManagementController {
     return this.orderManagementService.processRefund(id, refundData);
   }
 
-  @Get("analytics/overview")
+  @Get("analytics")
   @ApiOperation({
     summary: "Get order analytics",
     description:

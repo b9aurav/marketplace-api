@@ -23,6 +23,7 @@ import {
   ApiParam,
   ApiQuery,
 } from "@nestjs/swagger";
+import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
 import { AdminGuard } from "../guards/admin.guard";
 import { AdminAuditInterceptor } from "../interceptors/admin-audit.interceptor";
 import { AdminUser } from "../decorators/admin-user.decorator";
@@ -30,6 +31,7 @@ import { FileUploadService } from "../services/file-upload.service";
 import {
   UploadImageDto,
   FileUploadResponseDto,
+  FileUploadDetailedResponseDto,
   GetFilesQueryDto,
   PaginatedFilesResponseDto,
 } from "../dto/file-upload.dto";
@@ -37,8 +39,8 @@ import { User } from "../../users/entities/user.entity";
 
 @ApiTags("Admin - File Upload")
 @ApiBearerAuth()
-@Controller("api/admin/upload")
-@UseGuards(AdminGuard)
+@Controller("admin/upload")
+@UseGuards(JwtAuthGuard, AdminGuard)
 @UseInterceptors(AdminAuditInterceptor)
 export class FileUploadController {
   constructor(private readonly fileUploadService: FileUploadService) {}
@@ -191,7 +193,7 @@ export class FileUploadController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: "File details retrieved successfully",
-    type: FileUploadResponseDto,
+    type: FileUploadDetailedResponseDto,
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
@@ -203,7 +205,7 @@ export class FileUploadController {
   })
   async getFileById(
     @Param("id", ParseUUIDPipe) id: string,
-  ): Promise<FileUploadResponseDto> {
+  ): Promise<FileUploadDetailedResponseDto> {
     return this.fileUploadService.getFileById(id);
   }
 }

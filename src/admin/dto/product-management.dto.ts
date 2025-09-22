@@ -87,6 +87,15 @@ export class GetProductsQueryDto extends PaginationDto {
   date_to?: string;
 
   @ApiPropertyOptional({
+    description: "Filter by tags",
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @ApiPropertyOptional({
     enum: ["name", "price", "stock", "created_at", "sales_count", "rating"],
     description: "Sort by field",
   })
@@ -174,18 +183,18 @@ export class AdminCreateProductDto {
   @ApiPropertyOptional({ enum: ProductStatus, description: "Product status" })
   @IsOptional()
   @IsEnum(ProductStatus)
-  status?: ProductStatus = ProductStatus.ACTIVE;
+  status?: ProductStatus;
 
   @ApiPropertyOptional({ description: "Is product featured" })
   @IsOptional()
   @IsBoolean()
-  featured?: boolean = false;
+  featured?: boolean;
 
   @ApiPropertyOptional({ description: "Product tags", type: [String] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  tags?: string[] = [];
+  tags?: string[];
 
   @ApiPropertyOptional({ description: "SEO meta title" })
   @IsOptional()
@@ -201,7 +210,7 @@ export class AdminCreateProductDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
-  minimum_stock?: number = 0;
+  minimum_stock?: number;
 }
 
 // Update product DTO for admin
@@ -410,6 +419,15 @@ export class ProductDetailsDto {
   rating: number;
 
   @ApiProperty()
+  category_id: string;
+
+  @ApiProperty()
+  category: {
+    id: string;
+    name: string;
+  };
+
+  @ApiProperty()
   sku: string;
 
   @ApiProperty()
@@ -428,35 +446,10 @@ export class ProductDetailsDto {
   tags: string[];
 
   @ApiProperty()
-  meta_title: string;
-
-  @ApiProperty()
-  meta_description: string;
-
-  @ApiProperty()
-  minimum_stock: number;
-
-  @ApiProperty()
-  sales_count: number;
-
-  @ApiProperty()
-  category_id: string;
-
-  @ApiProperty()
   created_at: Date;
 
   @ApiProperty()
   updated_at: Date;
-
-  // Additional computed fields
-  @ApiProperty()
-  low_stock: boolean;
-
-  @ApiProperty()
-  category_name?: string;
-
-  @ApiProperty()
-  total_reviews?: number;
 }
 
 export class ProductAnalyticsDto {

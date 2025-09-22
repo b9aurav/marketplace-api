@@ -2,7 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from '../../products/entities/category.entity';
-import { CreateCategoryDto, UpdateCategoryDto } from '../dto/category-management.dto';
+import { 
+  CreateCategoryDto, 
+  UpdateCategoryDto, 
+  CategoryDto, 
+  CategoriesResponseDto, 
+  CategoryTreeResponseDto, 
+  CategoryTreeDto,
+  CategoryStatus 
+} from '../dto/category-management.dto';
 import { 
   Cache, 
   CacheInvalidate 
@@ -17,21 +25,29 @@ export class CategoryManagementService {
   ) {}
 
   @CacheInvalidate([CACHE_PATTERNS.CATEGORIES])
-  async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
+  async create(createCategoryDto: CreateCategoryDto): Promise<CategoryDto> {
     const category = this.categoryRepository.create(createCategoryDto);
-    return this.categoryRepository.save(category);
+    const saved = await this.categoryRepository.save(category);
+    return this.mapToCategoryDto(saved);
   }
 
   @Cache({ ttl: CACHE_TTL.CATEGORY_TREE })
-  async findAll(include_products: boolean): Promise<any[]> {
-    // Basic implementation, can be expanded based on include_products
-    return this.categoryRepository.find();
+  async findAll(include_products: boolean): Promise<CategoriesResponseDto> {
+    const categories = await this.categoryRepository.find();
+    return {
+      categories: categories.map(category => this.mapToCategoryDto(category))
+    };
   }
 
   @Cache({ ttl: CACHE_TTL.CATEGORY_TREE })
-  async findTree(): Promise<any[]> {
-    // This would require a more complex implementation to build a tree structure
-    return this.categoryRepository.find(); // Placeholder
+  async findTree(): Promise<CategoryTreeResponseDto> {
+    const categories = await this.categoryRepository
+      .createQueryBuilder("category")
+      .loadRelationCountAndMap("category.product_count", "category.products")
+      .getMany();
+    return {
+      categories: categories.map(category => this.mapToCategoryTreeDto(category))
+    };
   }
 
   async findOne(id: string): Promise<Category> {
@@ -43,10 +59,11 @@ export class CategoryManagementService {
   }
 
   @CacheInvalidate([CACHE_PATTERNS.CATEGORIES])
-  async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
+  async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<CategoryDto> {
     const category = await this.findOne(id);
     const updated = this.categoryRepository.merge(category, updateCategoryDto);
-    return this.categoryRepository.save(updated);
+    const saved = await this.categoryRepository.save(updated);
+    return this.mapToCategoryDto(saved);
   }
 
   @CacheInvalidate([CACHE_PATTERNS.CATEGORIES])
@@ -61,5 +78,32 @@ export class CategoryManagementService {
     // Placeholder for analytics logic
     const count = await this.categoryRepository.count();
     return { total_categories: count };
+  }
+
+  private mapToCategoryDto(category: Category): CategoryDto {
+    return {
+      id: category.id,
+      name: category.name,
+      description: category.description,
+      slug: category.slug,
+      parent_id: category.parent_id,
+      status: CategoryStatus.ACTIVE, // Default status since entity doesn't have it
+      sort_order: 0, // Default sort order
+      product_count: 0, // Default product count
+      created_at: category.created_at,
+      updated_at: category.updated_at,
+    };
+  }
+
+  private mapToCategoryTreeDto(category: Category): CategoryTreeDto {
+    return {
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+      status: CategoryStatus.ACTIVE, // Default status since entity doesn't have it
+      product_count: category.product_count,
+      level: 0, // Default level
+      children: [], // Would need to implement tree logic
+    };
   }
 }

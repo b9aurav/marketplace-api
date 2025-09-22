@@ -112,11 +112,8 @@ export class UserListItemDto {
   @ApiProperty({ enum: Role })
   role: Role;
 
-  @ApiProperty()
-  is_active: boolean;
-
-  @ApiProperty({ required: false })
-  last_login_at?: Date;
+  @ApiProperty({ enum: UserStatus, description: "User status" })
+  status: UserStatus;
 
   @ApiProperty()
   created_at: Date;
@@ -149,26 +146,32 @@ export class PaginatedUsersDto {
 }
 
 export class UserDetailsDto extends UserListItemDto {
-  @ApiProperty({ required: false })
-  metadata?: Record<string, any>;
+  @ApiProperty({ type: "array", items: { type: "object" } })
+  addresses: Array<{
+    id: string;
+    label: string;
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    is_default: boolean;
+  }>;
 
   @ApiProperty({ type: "array", items: { type: "object" } })
-  addresses: any[];
+  order_history: Array<{
+    id: string;
+    status: string;
+    total: number;
+    created_at: Date;
+  }>;
 
-  @ApiProperty({ type: "array", items: { type: "object" } })
-  recent_orders: any[];
-
-  @ApiProperty()
-  total_orders: number;
-
-  @ApiProperty()
-  average_order_value: number;
-
-  @ApiProperty({ required: false })
-  first_order_date?: Date;
-
-  @ApiProperty({ required: false })
-  last_order_date?: Date;
+  @ApiProperty({ type: "object" })
+  statistics: {
+    total_orders: number;
+    total_spent: number;
+    average_order_value: number;
+    last_order_date?: Date;
+  };
 }
 
 export class UserAnalyticsDto {
@@ -176,22 +179,13 @@ export class UserAnalyticsDto {
   total_users: number;
 
   @ApiProperty()
+  new_registrations: number;
+
+  @ApiProperty()
   active_users: number;
 
   @ApiProperty()
-  inactive_users: number;
-
-  @ApiProperty()
   blocked_users: number;
-
-  @ApiProperty()
-  new_users_today: number;
-
-  @ApiProperty()
-  new_users_this_week: number;
-
-  @ApiProperty()
-  new_users_this_month: number;
 
   @ApiProperty({ type: "array", items: { type: "object" } })
   registration_trend: Array<{
@@ -199,19 +193,12 @@ export class UserAnalyticsDto {
     count: number;
   }>;
 
-  @ApiProperty({ type: "array", items: { type: "object" } })
-  role_distribution: Array<{
-    role: string;
-    count: number;
-    percentage: number;
-  }>;
-
-  @ApiProperty({ type: "array", items: { type: "object" } })
-  activity_metrics: Array<{
-    period: string;
-    active_users: number;
-    login_count: number;
-  }>;
+  @ApiProperty({ type: "object" })
+  user_activity: {
+    daily_active: number;
+    weekly_active: number;
+    monthly_active: number;
+  };
 }
 
 export class GetUserAnalyticsQueryDto {

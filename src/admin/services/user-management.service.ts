@@ -11,11 +11,11 @@ import {
   CACHE_PATTERNS,
 } from "../../common/cache/constants/cache.constants";
 import { AdminAuditService } from "./admin-audit.service";
-import { 
-  CacheList, 
-  CacheUser, 
-  CacheAnalytics, 
-  CacheInvalidate 
+import {
+  CacheList,
+  CacheUser,
+  CacheAnalytics,
+  CacheInvalidate
 } from "../../common/cache/decorators/cache.decorator";
 import {
   GetUsersQueryDto,
@@ -41,7 +41,7 @@ export class UserManagementService {
     private cacheService: CacheService,
     private cacheKeyGenerator: CacheKeyGenerator,
     private auditService: AdminAuditService,
-  ) {}
+  ) { }
 
   @CacheList(CACHE_TTL.USER_LIST)
   async getUsers(query: GetUsersQueryDto): Promise<PaginatedUsersDto> {
@@ -131,13 +131,27 @@ export class UserManagementService {
 
     const userDetails: UserDetailsDto = {
       ...(await this.transformToUserListItem(user)),
-      metadata: user.metadata,
-      addresses: user.addresses || [],
-      recent_orders: recentOrders,
-      total_orders: orderStats.total_orders,
-      average_order_value: orderStats.average_order_value,
-      first_order_date: orderStats.first_order_date,
-      last_order_date: orderStats.last_order_date,
+      addresses: (user.addresses || []).map(addr => ({
+        id: addr.id,
+        label: addr.label || 'Address',
+        street: addr.street,
+        city: addr.city,
+        state: addr.state,
+        zip: addr.zip,
+        is_default: addr.is_default || false,
+      })),
+      order_history: recentOrders.map(order => ({
+        id: order.id,
+        status: order.status,
+        total: parseFloat(order.total.toString()),
+        created_at: order.created_at,
+      })),
+      statistics: {
+        total_orders: orderStats.total_orders,
+        total_spent: orderStats.total_spent,
+        average_order_value: orderStats.average_order_value,
+        last_order_date: orderStats.last_order_date,
+      },
     };
 
     // Cache the result
@@ -263,15 +277,15 @@ export class UserManagementService {
 
     const analytics: UserAnalyticsDto = {
       total_users: totalUsers,
+      new_registrations: newUsersToday, // Using today's registrations as new registrations
       active_users: activeUsers,
-      inactive_users: inactiveUsers,
       blocked_users: 0, // We don't have blocked status in current schema
-      new_users_today: newUsersToday,
-      new_users_this_week: newUsersThisWeek,
-      new_users_this_month: newUsersThisMonth,
       registration_trend: registrationTrend,
-      role_distribution: roleDistribution,
-      activity_metrics: activityMetrics,
+      user_activity: {
+        daily_active: activeUsers, // Simplified - using active users count
+        weekly_active: activeUsers,
+        monthly_active: activeUsers,
+      },
     };
 
     // Cache the result
@@ -339,8 +353,7 @@ export class UserManagementService {
       name: user.name,
       phone: user.phone,
       role: user.role,
-      is_active: user.is_active,
-      last_login_at: user.last_login_at,
+      status: user.is_active ? UserStatus.ACTIVE : UserStatus.INACTIVE,
       created_at: user.created_at,
       updated_at: user.updated_at,
       order_count: orderStats.total_orders,

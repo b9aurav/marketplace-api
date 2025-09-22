@@ -24,8 +24,8 @@ import { ProductsService } from "./products.service";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
 
-@ApiTags("Admin Products")
-@Controller("admin/products")
+@ApiTags("Admin Products Legacy")
+@Controller("admin/products-legacy")
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
 @ApiBearerAuth()

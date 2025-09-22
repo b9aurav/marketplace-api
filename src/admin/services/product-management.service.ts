@@ -22,6 +22,7 @@ import {
   AdminUpdateProductDto,
   UpdateInventoryDto,
   BulkProductActionDto,
+  ExportProductsDto,
   ProductDetailsDto,
   ProductAnalyticsDto,
   ExportResultDto,
@@ -76,6 +77,7 @@ export class ProductManagementService {
       date_to,
       sort_by = "created_at",
       sort_order = "desc",
+      tags,
     } = query;
 
     const queryBuilder = this.productRepository
@@ -94,6 +96,7 @@ export class ProductManagementService {
       max_stock,
       date_from,
       date_to,
+      tags,
     });
 
     // Apply sorting
@@ -323,13 +326,13 @@ export class ProductManagementService {
     await this.invalidateProductCaches();
   }
 
-  async exportProducts(): Promise<ExportResultDto> {
+  async exportProducts(data: ExportProductsDto): Promise<ExportResultDto> {
     // This is a simplified implementation
     // In a real application, you would use a background job queue
     const exportId = `export_${Date.now()}`;
 
     // For now, return a mock response
-    // In production, this would trigger a background job
+    // In production, this would trigger a background job and use the data parameter
     return {
       export_id: exportId,
       status: "processing",
@@ -516,6 +519,7 @@ export class ProductManagementService {
       max_stock?: number;
       date_from?: string;
       date_to?: string;
+      tags?: string[];
     },
   ): void {
     const {
@@ -529,6 +533,7 @@ export class ProductManagementService {
       max_stock,
       date_from,
       date_to,
+      tags,
     } = filters;
 
     if (search) {
@@ -574,6 +579,10 @@ export class ProductManagementService {
 
     if (date_to) {
       queryBuilder.andWhere("product.created_at <= :date_to", { date_to });
+    }
+
+    if (tags && tags.length > 0) {
+      queryBuilder.andWhere("product.tags && :tags", { tags });
     }
   }
 
@@ -624,16 +633,13 @@ export class ProductManagementService {
       status: product.status,
       featured: product.featured,
       tags: product.tags,
-      meta_title: product.meta_title,
-      meta_description: product.meta_description,
-      minimum_stock: product.minimum_stock,
-      sales_count: product.sales_count,
       category_id: product.category_id,
+      category: {
+        id: product.category?.id || product.category_id,
+        name: product.category?.name || 'Unknown Category',
+      },
       created_at: product.created_at,
       updated_at: product.updated_at,
-      low_stock: product.stock <= product.minimum_stock && product.stock > 0,
-      category_name: product.category?.name,
-      total_reviews: product.reviews?.length || 0,
     };
   }
 

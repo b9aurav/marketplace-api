@@ -389,7 +389,7 @@ describe("UserManagementService", () => {
       expect(cacheService.set).toHaveBeenCalled();
       expect(result.total_users).toBe(100);
       expect(result.active_users).toBe(80);
-      expect(result.inactive_users).toBe(20);
+      expect(result.new_registrations).toBeDefined();
     });
   });
 });
